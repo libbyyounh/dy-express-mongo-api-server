@@ -29,9 +29,12 @@ const processTaskQueue = async () => {
     try {
       // Call Hamibot API
       const response = await axios.post(
-        'https://api.hamibot.com/v1/scripts/6885a2626e8b56a73da87f18/run',
+        `https://api.hamibot.com/v1/scripts/${process.env.HAMIBOT_SCRIPT_ID}/run`,
         JSON.stringify({
-          devices: [{ _id: '6870b497f2d126b2b6c717fd', name: '精妙黄豆' }],
+          devices: [{
+            _id: process.env.HAMIBOT_DEVICE_ID,
+            name: process.env.HAMIBOT_DEVICE_NAME
+          }],
           vars: {
             remoteUrl: data.url,
             speed: speed
