@@ -1,0 +1,63 @@
+# 依赖项
+/node_modules
+/.pnp
+.pnp.js
+
+# 测试
+/coverage
+
+# 构建输出
+/build
+/dist
+
+# 环境变量
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.docker
+
+# 日志
+logs
+*.log
+
+# 编辑器配置
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 操作系统文件
+.DS_Store
+Thumbs.db
+
+# 缓存
+.npm
+.eslintcache
+
+# Docker相关
+.docker/
+
+# 其他
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 应用数据
+/data/
+/tmp/
+
+# 备份文件
+*.bak
+*~```
+
+### 关键排除项说明：
+1. **环境变量**：所有.env*文件都被排除，防止敏感信息泄露
+2. **依赖项**：node_modules不纳入版本控制
+3. **编辑器文件**：排除VSCode和JetBrains系列IDE配置
+4. **操作系统文件**：处理macOS的.DS_Store等系统文件
+5. **Docker相关**：排除Docker构建产物
+6. **日志和缓存**：避免提交日志文件和缓存数据
+
+这个配置适合Node.js/Express/MongoDB项目，结合了您之前设置的环境变量和Docker配置需求。创建文件后，确保已提交到版本控制以保持团队一致性。
