@@ -11,8 +11,6 @@ services:
       - ./:/app
       - /app/node_modules
     restart: unless-stopped
-    depends_on:
-      - mongodb  # 表示依赖MongoDB服务（仅用于启动顺序）
     networks:
       - app-network  # 加入同一个共享网络
 networks:
