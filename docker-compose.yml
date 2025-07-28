@@ -11,4 +11,14 @@ services:
       - ./:/app
       - /app/node_modules
     restart: unless-stopped
-    # 已移除MongoDB依赖配置
+    depends_on:
+      - mongodb  # 表示依赖MongoDB服务（仅用于启动顺序）
+    networks:
+      - app-network  # 加入同一个共享网络
+networks:
+  app-network:
+    external: true  # 使用相同的外部共享网络
+
+# 声明对MongoDB服务的依赖（仅用于Compose的启动顺序控制）
+volumes:
+  node_modules:
