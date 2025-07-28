@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const { authenticateToken } = require('../middleware/auth');
+const { authenticateToken, generateShortToken } = require('../middleware/auth');
+const User = require('../models/User');
 const axios = require('axios');
 const mongoose = require('mongoose');
 
@@ -27,7 +28,28 @@ const processTaskQueue = async () => {
     const delay = speed === 'a' ? 150000 : 230000; // 150s or 230s
 
     try {
+      // stop current task first
+      await axios.delete(
+        `https://api.hamibot.com/v1/scripts/${process.env.HAMIBOT_SCRIPT_ID}/run`,
+        JSON.stringify({
+          devices: [{
+            _id: process.env.HAMIBOT_DEVICE_ID,
+            name: process.env.HAMIBOT_DEVICE_NAME
+          }],
+          vars: {
+            remoteUrl: data.url,
+            speed: speed
+          }
+        }),
+        {
+          headers: {
+            'authorization': `${process.env.HAMIBOT_TOKEN}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
       // Call Hamibot API
+      const user = await User.findOne({ username: 'admin' });
       const response = await axios.post(
         `https://api.hamibot.com/v1/scripts/${process.env.HAMIBOT_SCRIPT_ID}/run`,
         JSON.stringify({
@@ -36,6 +58,8 @@ const processTaskQueue = async () => {
             name: process.env.HAMIBOT_DEVICE_NAME
           }],
           vars: {
+            serverToken: generateShortToken(user),
+            serverUrl: 'http://192.168.2.135:3000/api/updateUsed',
             remoteUrl: data.url,
             speed: speed
           }

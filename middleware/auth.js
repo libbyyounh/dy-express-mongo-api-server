@@ -10,6 +10,14 @@ const generateToken = (user) => {
   );
 };
 
+const generateShortToken = (user) => {
+  return jwt.sign(
+    { id: user._id, username: user.username },
+    process.env.JWT_SECRET,
+    { expiresIn: '5m' }
+  );
+};
+
 // Authenticate JWT token middleware
 const authenticateToken = async (req, res, next) => {
   try {
@@ -43,5 +51,6 @@ const authenticateToken = async (req, res, next) => {
 
 module.exports = {
   generateToken,
+  generateShortToken,
   authenticateToken
 };
