@@ -1,4 +1,5 @@
 const express = require('express');
+const mongoose = require('mongoose'); // 添加mongoose导入
 const router = express.Router();
 const moment = require('moment');
 const Mobile = require('../models/Mobile');

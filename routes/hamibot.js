@@ -24,78 +24,85 @@ const processTaskQueue = async () => {
   isProcessingQueue = true;
   while (taskQueue.length > 0) {
     const task = taskQueue.shift();
-    const { mobile, speed, data, res } = task;
+    const { mobile, speed, data, res, index } = task;
     const delay = speed === 'a' ? 150000 : 230000; // 150s or 230s
 
     try {
+      console.log('running taskQueue index:' + index);
       // stop current task first
-      await axios.delete(
+      const res = await axios.delete(
         `https://api.hamibot.com/v1/scripts/${process.env.HAMIBOT_SCRIPT_ID}/run`,
-        JSON.stringify({
-          devices: [{
-            _id: process.env.HAMIBOT_DEVICE_ID,
-            name: process.env.HAMIBOT_DEVICE_NAME
-          }],
-          vars: {
-            remoteUrl: data.url,
-            speed: speed
-          }
-        }),
         {
           headers: {
-            'authorization': `${process.env.HAMIBOT_TOKEN}`,
-            'Content-Type': 'application/json'
+            'authorization': `${process.env.HAMIBOT_TOKEN}`
+          },
+          data: {
+            devices: [{
+              _id: process.env.HAMIBOT_DEVICE_ID,
+              name: process.env.HAMIBOT_DEVICE_NAME
+            }],
+            vars: {
+              remoteUrl: data.url,
+              speed: speed
+            }
           }
         }
       );
+      if (!res || res.status !== 204) {
+        throw new Error(`Hamibot API调用失败: ${response ? response.status : '无响应'}`);
+      }
       // Call Hamibot API
       const user = await User.findOne({ username: 'admin' });
       const response = await axios.post(
         `https://api.hamibot.com/v1/scripts/${process.env.HAMIBOT_SCRIPT_ID}/run`,
-        JSON.stringify({
-          devices: [{
-            _id: process.env.HAMIBOT_DEVICE_ID,
-            name: process.env.HAMIBOT_DEVICE_NAME
-          }],
-          vars: {
-            serverToken: generateShortToken(user),
-            serverUrl: process.env.HAMIBOT_SERVER_URL,
-            remoteUrl: data.url,
-            speed: speed
-          }
-        }),
         {
           headers: {
             'authorization': `${process.env.HAMIBOT_TOKEN}`,
             'Content-Type': 'application/json'
+          },
+          data: {
+            devices: [{
+              _id: process.env.HAMIBOT_DEVICE_ID,
+              name: process.env.HAMIBOT_DEVICE_NAME
+            }],
+            vars: {
+              serverToken: generateShortToken(user),
+              serverUrl: process.env.HAMIBOT_SERVER_URL,
+              remoteUrl: data.url,
+              speed: speed
+            }
           }
         }
       );
-      task.startTime = Date.now(); // 记录任务开始时间
+      
       if (!response || response.status !== 204) {
         throw new Error(`Hamibot API调用失败: ${response ? response.status : '无响应'}`);
       }
 
+      task.startTime = Date.now(); // 记录任务开始时间
+
       // Update task status
       task.status = 'completed';
-      task.result = response.data;
+      // task.result = response.data;
+      task.result = res.data;
 
       // Directly update database
       const collectionName = getDailyCollectionName();
       const Collection = mongoose.connection.collection(collectionName);
       await Collection.updateOne(
-        { _id: mongoose.Types.ObjectId(data._id) },
+        { _id: new mongoose.Types.ObjectId(data._id) }, // Add 'new' keyword here
         { $set: { isUsed: true } }
       );
 
     } catch (error) {
       task.status = 'failed';
       task.error = error.message;
+      throw new Error(`任务执行失败: ${error.message}`);
     }
 
     // Check if task.startTime is undefined
     if (task.startTime === undefined) {
-      addLog('Error: task.startTime is undefined, terminating all tasks');
+      console.error('Error: task.startTime is undefined, terminating all tasks');
       taskQueue.length = 0; // Clear all remaining tasks
       isProcessingQueue = false;
       break; // Exit processing loop
@@ -136,6 +143,7 @@ router.post('/hamibot/execute', authenticateToken, async (req, res) => {
     const taskIds = dataItems.map((item, index) => {
       const taskId = `task_${Date.now()}_${index}`;
       taskQueue.push({
+        index: index,
         id: taskId,
         mobile: mobile,
         speed: speed,
@@ -167,6 +175,7 @@ router.post('/hamibot/stop', authenticateToken, (req, res) => {
     taskQueue.length = 0;
     isProcessingQueue = false;
     res.json({ message: '所有任务已成功停止' });
+    console.log('all tasks stopped');
   } catch (error) {
     res.status(500).json({ message: '停止任务失败', error: error.message });
   }
