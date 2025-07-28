@@ -51,26 +51,27 @@ const processTaskQueue = async () => {
       if (!res || res.status !== 204) {
         throw new Error(`Hamibot API调用失败: ${response ? response.status : '无响应'}`);
       }
+      console.log('stop Hamibot task success');
       // Call Hamibot API
       const user = await User.findOne({ username: 'admin' });
       const response = await axios.post(
         `https://api.hamibot.com/v1/scripts/${process.env.HAMIBOT_SCRIPT_ID}/run`,
         {
+          devices: [{
+            _id: process.env.HAMIBOT_DEVICE_ID,
+            name: process.env.HAMIBOT_DEVICE_NAME
+          }],
+          vars: {
+            // serverToken: generateShortToken(user),
+            // serverUrl: process.env.HAMIBOT_SERVER_URL,
+            remoteUrl: data.url,
+            speed: speed
+          }
+        },
+        {
           headers: {
-            'authorization': `${process.env.HAMIBOT_TOKEN}`,
-            'Content-Type': 'application/json'
-          },
-          data: {
-            devices: [{
-              _id: process.env.HAMIBOT_DEVICE_ID,
-              name: process.env.HAMIBOT_DEVICE_NAME
-            }],
-            vars: {
-              serverToken: generateShortToken(user),
-              serverUrl: process.env.HAMIBOT_SERVER_URL,
-              remoteUrl: data.url,
-              speed: speed
-            }
+            'authorization': `${process.env.HAMIBOT_TOKEN}`
+            // 'Content-Type': 'application/json'
           }
         }
       );
@@ -78,6 +79,7 @@ const processTaskQueue = async () => {
       if (!response || response.status !== 204) {
         throw new Error(`Hamibot API调用失败: ${response ? response.status : '无响应'}`);
       }
+      console.log('run Hamibot task success');
 
       task.startTime = Date.now(); // 记录任务开始时间
 
