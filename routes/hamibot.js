@@ -59,7 +59,7 @@ const processTaskQueue = async () => {
           }],
           vars: {
             serverToken: generateShortToken(user),
-            serverUrl: 'http://192.168.2.135:3000/api/updateUsed',
+            serverUrl: process.env.HAMIBOT_SERVER_URL,
             remoteUrl: data.url,
             speed: speed
           }
