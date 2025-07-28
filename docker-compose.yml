@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  api:
+    build: .
+    container_name: dy-express-api
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    restart: unless-stopped
+    # 已移除MongoDB依赖配置
