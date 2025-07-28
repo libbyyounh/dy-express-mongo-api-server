@@ -171,11 +171,33 @@ router.post('/hamibot/execute', authenticateToken, async (req, res) => {
 });
 
 // Stop all tasks
-router.post('/hamibot/stop', authenticateToken, (req, res) => {
+router.post('/hamibot/stop', authenticateToken, async (req, res) => {
   try {
     // Clear task queue and stop processing
     taskQueue.length = 0;
     isProcessingQueue = false;
+    // stop current task first
+    const res = await axios.delete(
+      `https://api.hamibot.com/v1/scripts/${process.env.HAMIBOT_SCRIPT_ID}/run`,
+      {
+        headers: {
+          'authorization': `${process.env.HAMIBOT_TOKEN}`
+        },
+        data: {
+          devices: [{
+            _id: process.env.HAMIBOT_DEVICE_ID,
+            name: process.env.HAMIBOT_DEVICE_NAME
+          }],
+          vars: {
+            remoteUrl: data.url,
+            speed: speed
+          }
+        }
+      }
+    );
+    if (!res || res.status !== 204) {
+      throw new Error(`Hamibot API调用失败: ${response ? response.status : '无响应'}`);
+    }
     res.json({ message: '所有任务已成功停止' });
     console.log('all tasks stopped');
   } catch (error) {
