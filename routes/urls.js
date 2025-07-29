@@ -350,4 +350,213 @@ router.put('/updateUrl', async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/table: 
+ *   get:
+ *     summary: Get URL collection data by date
+ *     tags: [URLs]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: date
+ *         schema:
+ *           type: string
+ *           format: YYYYMMDD
+ *         required: true
+ *         description: Date in YYYYMMDD format to query
+ *     responses:
+ *       200:
+ *         description: Table data with headers and rows
+ *       400:
+ *         description: Invalid date format
+ *       404:
+ *         description: Collection not found
+ *       500:
+ *         description: Server error
+ */
+router.get('/table', async (req, res) => {
+  try {
+    const { date } = req.query;
+    // Validate date format
+    if (!/^\d{8}$/.test(date)) {
+      return res.status(400).json({
+        message: 'Invalid date format. Please use YYYYMMDD'
+      });
+    }
+
+    // Check if collection exists
+    const collectionName = date;
+    const collections = await mongoose.connection.db.listCollections({ name: collectionName }).toArray();
+    if (collections.length === 0) {
+      return res.status(404).json({
+        message: `Collection for date ${date} not found`
+      });
+    }
+
+    // Get table data
+    const UrlModel = createUrlModel(collectionName);
+    const rows = await UrlModel.find({});
+
+    // Get headers from the first document
+    const headers = rows.length > 0 ? Object.keys(rows[0]._doc) : [];
+    // Remove _id and __v from headers
+    const filteredHeaders = headers.filter(header => !['_id', '__v'].includes(header));
+
+    res.json({
+      headers: filteredHeaders,
+      rows: rows.map(row => {
+        const rowData = { ...row._doc };
+        delete rowData.__v;
+        return rowData;
+      })
+    });
+  } catch (error) {
+    console.error('Error getting table data:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+/**
+ * @swagger
+ * /api/batch/delete: 
+ *   post:
+ *     summary: Batch delete URLs by IDs
+ *     tags: [URLs]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - date
+ *               - ids
+ *             properties:
+ *               date:
+ *                 type: string
+ *                 format: YYYYMMDD
+ *                 description: Date of collection
+ *               ids:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Array of URL IDs to delete
+ *     responses:
+ *       200:
+ *         description: URLs deleted successfully
+ *       400:
+ *         description: Invalid input
+ *       404:
+ *         description: Collection not found
+ *       500:
+ *         description: Server error
+ */
+router.post('/batch/delete', async (req, res) => {
+  try {
+    const { date, ids } = req.body;
+
+    // Validate input
+    if (!date || !/^\d{8}$/.test(date)) {
+      return res.status(400).json({ message: 'Valid date (YYYYMMDD) is required' });
+    }
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ message: 'Array of IDs is required' });
+    }
+
+    // Check if collection exists
+    const collectionName = date;
+    const collections = await mongoose.connection.db.listCollections({ name: collectionName }).toArray();
+    if (collections.length === 0) {
+      return res.status(404).json({ message: `Collection for date ${date} not found` });
+    }
+
+    // Delete documents
+    const UrlModel = createUrlModel(collectionName);
+    const result = await UrlModel.deleteMany({ _id: { $in: ids } });
+
+    res.json({
+      message: `${result.deletedCount} URLs deleted successfully`,
+      deletedCount: result.deletedCount
+    });
+  } catch (error) {
+    console.error('Error batch deleting URLs:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+/**
+ * @swagger
+ * /api/batch/update-used: 
+ *   post:
+ *     summary: Batch update isUsed status to false
+ *     tags: [URLs]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - date
+ *               - ids
+ *             properties:
+ *               date:
+ *                 type: string
+ *                 format: YYYYMMDD
+ *                 description: Date of collection
+ *               ids:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Array of URL IDs to update
+ *     responses:
+ *       200:
+ *         description: URLs updated successfully
+ *       400:
+ *         description: Invalid input
+ *       404:
+ *         description: Collection not found
+ *       500:
+ *         description: Server error
+ */
+router.post('/batch/update-used', async (req, res) => {
+  try {
+    const { date, ids } = req.body;
+
+    // Validate input
+    if (!date || !/^\d{8}$/.test(date)) {
+      return res.status(400).json({ message: 'Valid date (YYYYMMDD) is required' });
+    }
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ message: 'Array of IDs is required' });
+    }
+
+    // Check if collection exists
+    const collectionName = date;
+    const collections = await mongoose.connection.db.listCollections({ name: collectionName }).toArray();
+    if (collections.length === 0) {
+      return res.status(404).json({ message: `Collection for date ${date} not found` });
+    }
+
+    // Update documents
+    const UrlModel = createUrlModel(collectionName);
+    const result = await UrlModel.updateMany(
+      { _id: { $in: ids } },
+      { $set: { isUsed: false } }
+    );
+
+    res.json({
+      message: `${result.modifiedCount} URLs updated successfully`,
+      modifiedCount: result.modifiedCount
+    });
+  } catch (error) {
+    console.error('Error batch updating URLs:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 module.exports = router;
