@@ -75,10 +75,22 @@
         }
 
         // 添加日志
+        let logEntries = []; // 日志存储数组
+        const MAX_LOG_ENTRIES = 100; // 最大日志条数
+        
         function addLog(message) {
             const logElement = document.getElementById('logContent');
             const timestamp = new Date().toLocaleTimeString();
-            logElement.innerHTML += `[${timestamp}] ${message}\n`;
+            const logEntry = `[${timestamp}] ${message}`;
+        
+            // 添加新日志并维持FIFO队列
+            logEntries.push(logEntry);
+            if (logEntries.length > MAX_LOG_ENTRIES) {
+                logEntries.shift(); // 移除最早的日志
+            }
+        
+            // 渲染日志（使用数组join避免多次innerHTML操作）
+            logElement.innerHTML = logEntries.join('\n');
             logElement.scrollTop = logElement.scrollHeight;
         }
 
@@ -95,7 +107,7 @@
                     });
                     if (!response.ok) throw new Error('获取日志失败');
                     const logData = await response.json();
-                    addLog('任务队列状态：' + logData.queueLength + '个任务待处理');
+                    addLog('任务队列状态：' + logData.queueLength + '个任务待处理' + '，当前处理任务数：' + Number(logData.isProcessingQueue));
                     logData.tasks.forEach(task => {
                         addLog(`任务 ${task.id}: ${task.status} ${task.error ? '错误：' + task.error : ''}`);
                     });

@@ -49,8 +49,4 @@ const authenticateToken = async (req, res, next) => {
   }
 };
 
-module.exports = {
-  generateToken,
-  generateShortToken,
-  authenticateToken
-};
+module.exports = { generateToken, generateShortToken, authenticateToken };

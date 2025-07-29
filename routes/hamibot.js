@@ -49,7 +49,7 @@ const processTaskQueue = async () => {
         }
       );
       if (!res || res.status !== 204) {
-        throw new Error(`Hamibot API调用失败: ${response ? response.status : '无响应'}`);
+        throw new Error(`Hamibot API调用停止失败: ${response ? response.status : '无响应'}`);
       }
       console.log('stop Hamibot task success');
       // Call Hamibot API
@@ -77,7 +77,7 @@ const processTaskQueue = async () => {
       );
       
       if (!response || response.status !== 204) {
-        throw new Error(`Hamibot API调用失败: ${response ? response.status : '无响应'}`);
+        throw new Error(`Hamibot API调用执行失败: ${response ? response.status : '无响应'}`);
       }
       console.log('run Hamibot task success');
 
@@ -196,7 +196,7 @@ router.post('/hamibot/stop', authenticateToken, async (req, res) => {
       }
     );
     if (!res || res.status !== 204) {
-      throw new Error(`Hamibot API调用失败: ${response ? response.status : '无响应'}`);
+      throw new Error(`Hamibot API调用停止失败: ${response ? response.status : '无响应'}`);
     }
     res.json({ message: '所有任务已成功停止' });
     console.log('all tasks stopped');
@@ -208,6 +208,7 @@ router.post('/hamibot/stop', authenticateToken, async (req, res) => {
 // Get execution logs
 router.get('/hamibot/log', authenticateToken, (req, res) => {
   res.json({
+    isProcessingQueue: isProcessingQueue,
     queueLength: taskQueue.length,
     tasks: taskQueue.map(task => ({
       id: task.id,

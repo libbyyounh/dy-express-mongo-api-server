@@ -12,6 +12,7 @@ const authRoutes = require('./routes/auth');
 const urlRoutes = require('./routes/urls');
 const mobileRoutes = require('./routes/mobiles');
 const hamibotRoutes = require('./routes/hamibot');
+const usersRouter = require('./routes/users');
 
 // Initialize Express app
 const app = express();
@@ -80,6 +81,7 @@ app.use('/api', authRoutes);
 app.use('/api', authenticateToken, urlRoutes);
 app.use('/api', authenticateToken, mobileRoutes);
 app.use('/api', authenticateToken, hamibotRoutes);
+app.use('/api/users', authenticateToken, usersRouter);
 
 // Root route serves the main application
 app.get('/', (req, res) => {
