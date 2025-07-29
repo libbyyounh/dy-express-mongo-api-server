@@ -1,37 +1,16 @@
 /* 圆形浮动导航栏样式 */
 .float-nav-container {
     position: fixed;
-    top: auto; /* 将由JS控制实际位置 */
-    left: auto; /* 将由JS控制实际位置 */
-    bottom: 30px; /* 初始位置 */
-    right: 30px; /* 初始位置 */
+    left: 0px;
+    top: 0px;
     z-index: 1000;
-    transition: transform 0.1s ease-out; /* 平滑移动过渡 */
-    touch-action: none; /* 禁用浏览器默认触摸行为 */
     user-select: none; /* 禁止文本选择 */
-}
-
-/* 添加拖拽提示样式 */
-.float-nav-drag-handle {
-    position: absolute;
-    top: -10px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 20px;
-    height: 4px;
-    background-color: rgba(255,255,255,0.5);
-    border-radius: 2px;
-    display: none;
-}
-
-.float-nav-container:hover .float-nav-drag-handle {
-    display: block;
 }
 
 /* 主按钮样式 */
 .float-nav-main-btn {
-    width: 60px;
-    height: 60px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     background-color: #007bff;
     color: white;
