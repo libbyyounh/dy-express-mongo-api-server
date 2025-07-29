@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>URL收集表格查询</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/float-nav.css">
     <style>
         .container {
             max-width: 1200px;
@@ -146,6 +147,11 @@
         <div class="table-container" id="tableContainer"></div>
     </div>
 
-    <script src="js/url-table.js"></script>
+    <script src="/js/url-table.js"></script>
+    <script src="/js/float-nav.js"></script>
+    <script>
+        // 初始化浮动导航，当前页面为url-table
+        initFloatNav('url-table');
+    </script>
 </body>
 </html>

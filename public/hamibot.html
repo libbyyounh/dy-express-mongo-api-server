@@ -17,6 +17,7 @@
         .log-content { height: 300px; background: #fff; border: 1px solid #ddd; padding: 10px; overflow-y: auto; white-space: pre-wrap; }
         .radio-group { display: flex; gap: 15px; margin-top: 5px; }
     </style>
+    <link rel="stylesheet" href="/css/float-nav.css">
 </head>
 <body>
     <div class="container">
@@ -206,6 +207,11 @@
             loadMobileDevices();
             addLog('系统就绪，等待操作...');
         };
+    </script>
+    <script src="/js/float-nav.js"></script>
+    <script>
+        // 初始化浮动导航，当前页面为hamibot
+        initFloatNav('hamibot');
     </script>
 </body>
 </html>

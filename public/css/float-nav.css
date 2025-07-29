@@ -1,0 +1,106 @@
+/* 圆形浮动导航栏样式 */
+.float-nav-container {
+    position: fixed;
+    top: auto; /* 将由JS控制实际位置 */
+    left: auto; /* 将由JS控制实际位置 */
+    bottom: 30px; /* 初始位置 */
+    right: 30px; /* 初始位置 */
+    z-index: 1000;
+    transition: transform 0.1s ease-out; /* 平滑移动过渡 */
+    touch-action: none; /* 禁用浏览器默认触摸行为 */
+    user-select: none; /* 禁止文本选择 */
+}
+
+/* 添加拖拽提示样式 */
+.float-nav-drag-handle {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 4px;
+    background-color: rgba(255,255,255,0.5);
+    border-radius: 2px;
+    display: none;
+}
+
+.float-nav-container:hover .float-nav-drag-handle {
+    display: block;
+}
+
+/* 主按钮样式 */
+.float-nav-main-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease;
+}
+
+.float-nav-main-btn.active {
+    transform: rotate(45deg);
+}
+
+/* 菜单项容器 */
+.float-nav-menu {
+    position: absolute;
+    bottom: 70px;
+    right: 0;
+    display: none;
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-end;
+}
+
+.float-nav-menu.active {
+    display: flex;
+}
+
+/* 菜单项样式 */
+.float-nav-item {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: white;
+    color: #333;
+    border: none;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.float-nav-item:hover {
+    transform: scale(1.1);
+    background-color: #f0f0f0;
+}
+
+/* 菜单项标签 */
+.float-nav-label {
+    position: absolute;
+    right: 60px;
+    background-color: rgba(0,0,0,0.7);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.float-nav-item:hover .float-nav-label {
+    opacity: 1;
+}
