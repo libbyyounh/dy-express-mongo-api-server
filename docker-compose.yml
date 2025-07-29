@@ -7,6 +7,8 @@ services:
       - "3000:3000"
     env_file:
       - .env
+    environment:
+      - TZ=Asia/Shanghai  # 强制覆盖时区环境变量
     volumes:
       - ./:/app
       - /app/node_modules
@@ -17,6 +19,5 @@ networks:
   app-network:
     external: true  # 使用相同的外部共享网络
 
-# 声明对MongoDB服务的依赖（仅用于Compose的启动顺序控制）
 volumes:
   node_modules:
