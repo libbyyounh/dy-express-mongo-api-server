@@ -216,4 +216,10 @@ router.get('/hamibot/log', authenticateToken, (req, res) => {
   });
 });
 
-module.exports = router;
+// 添加任务队列清理函数
+function clearTaskQueue() {
+  taskQueue.length = 0;
+  isProcessingQueue = false;
+}
+
+module.exports = { router, clearTaskQueue };

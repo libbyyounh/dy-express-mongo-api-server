@@ -6,7 +6,9 @@
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js",
-    "init": "node init-remote-mongo.js"
+    "test": "jest --forceExit --detectOpenHandles",
+    "test:watch": "jest --watch --forceExit",
+    "test:coverage": "jest --coverage --forceExit"
   },
   "dependencies": {
     "axios": "^1.11.0",
@@ -23,6 +25,9 @@
     "swagger-ui-express": "^5.0.0"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1"
+    "jest": "^29.7.0",
+    "mongodb-memory-server": "^10.1.4",
+    "nodemon": "^3.0.1",
+    "supertest": "^7.1.4"
   }
 }

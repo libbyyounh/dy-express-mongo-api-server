@@ -11,7 +11,8 @@ const { initializeDatabase, createDailyCollection, cleanupOldCollections } = req
 const authRoutes = require('./routes/auth');
 const urlRoutes = require('./routes/urls');
 const mobileRoutes = require('./routes/mobiles');
-const hamibotRoutes = require('./routes/hamibot');
+// 修改hamibot路由导入方式
+const { router: hamibotRouter } = require('./routes/hamibot');
 const usersRouter = require('./routes/users');
 
 // Initialize Express app
@@ -80,7 +81,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.use('/api', authRoutes);
 app.use('/api', authenticateToken, urlRoutes);
 app.use('/api', authenticateToken, mobileRoutes);
-app.use('/api', authenticateToken, hamibotRoutes);
+app.use('/api', authenticateToken, hamibotRouter);
 app.use('/api/users', authenticateToken, usersRouter);
 
 // Root route serves the main application
@@ -93,9 +94,10 @@ app.get('/hamibot', authenticateToken, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'hamibot.html'));
 });
 
-// Connect to MongoDB and start server
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => {
+// 将数据库连接和服务器启动代码封装为函数
+const startServer = async () => {
+  try {
+    await mongoose.connect(process.env.MONGODB_URI);
     console.log('Connected to MongoDB');
     
     // Initialize database with default data
@@ -107,10 +109,16 @@ mongoose.connect(process.env.MONGODB_URI)
       console.log(`Server running on port ${PORT}`);
       console.log(`Swagger UI available at http://localhost:${PORT}/api-docs`);
     });
-  })
-  .catch(err => {
+  } catch (err) {
     console.error('MongoDB connection error:', err);
     process.exit(1);
-  });
+  }
+};
+
+// 仅在直接运行时启动服务器，测试时不启动
+if (require.main === module) {
+  startServer();
+}
 
 module.exports = app;
+module.exports.startServer = startServer; // 导出供测试使用
