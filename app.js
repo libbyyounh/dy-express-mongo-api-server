@@ -97,7 +97,13 @@ app.get('/hamibot', authenticateToken, (req, res) => {
 // 将数据库连接和服务器启动代码封装为函数
 const startServer = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI);
+    // 修改MongoDB连接配置
+    mongoose.connect(process.env.MONGODB_URI, {
+      maxPoolSize: 20, // 连接池大小
+      minPoolSize: 5,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000
+    });
     console.log('Connected to MongoDB');
     
     // Initialize database with default data

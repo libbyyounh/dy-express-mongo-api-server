@@ -3,6 +3,9 @@ const mongoose = require('mongoose'); // 添加mongoose导入
 const router = express.Router();
 const moment = require('moment');
 const Mobile = require('../models/Mobile');
+const rateLimit = require('express-rate-limit');
+const NodeCache = require('node-cache');
+const cache = new NodeCache({ stdTTL: 300 }); // 5分钟缓存
 // 加载环境变量
 require('dotenv').config();
 
@@ -64,7 +67,12 @@ router.post('/postUrl', async (req, res) => {
     }
     
     // 获取活跃的手机号
-    const mobiles = await Mobile.find({ disabled: false });
+    // 从缓存获取活跃手机号
+    let mobiles = cache.get('active_mobiles');
+    if (!mobiles) {
+      mobiles = await Mobile.find({ disabled: false });
+      cache.set('active_mobiles', mobiles); // 缓存结果
+    }
     if (mobiles.length === 0) {
       return res.status(500).json({ message: 'No active mobile numbers available' });
     }
@@ -559,4 +567,15 @@ router.post('/batch/update-used', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+// 全局API限流 - 100并发/分钟
+const apiLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1分钟
+  max: 100, // 限制100个并发请求
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: '请求过于频繁，请稍后再试' }
+});
+
+// 为所有URLs接口应用限流
+router.use(apiLimiter);
 module.exports = router;
