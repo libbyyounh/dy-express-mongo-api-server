@@ -9,6 +9,7 @@
     "init": "node init-remote-mongo.js"
   },
   "dependencies": {
+    "async-lock": "^1.4.1",
     "axios": "^1.11.0",
     "bcryptjs": "^3.0.2",
     "cookie-parser": "^1.4.6",
@@ -20,7 +21,8 @@
     "mongoose": "^7.5.0",
     "node-schedule": "^2.1.1",
     "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.0"
+    "swagger-ui-express": "^5.0.0",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
