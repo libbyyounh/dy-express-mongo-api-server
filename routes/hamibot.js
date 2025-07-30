@@ -24,8 +24,7 @@ const processTaskQueue = async () => {
   isProcessingQueue = true;
   while (taskQueue.length > 0) {
     const task = taskQueue.shift();
-    const { mobile, speed, data, res, index } = task;
-    const delay = speed === 'a' ? 150000 : 230000; // 150s or 230s
+    const { mobile, speed, delay, data, res, index } = task;
 
     try {
       console.log('running taskQueue index:' + index);
@@ -112,7 +111,7 @@ const processTaskQueue = async () => {
 
     // Calculate time remaining until next task can start
     const timeSinceStart = Date.now() - task.startTime;
-    const waitTime = Math.max(0, delay - timeSinceStart);
+    const waitTime = Math.max(0, Number(delay) - timeSinceStart);
     
     // Wait before processing next task
     if (taskQueue.length > 0 && waitTime > 0) {
@@ -126,7 +125,7 @@ const processTaskQueue = async () => {
 // Execute Hamibot script
 router.post('/hamibot/execute', authenticateToken, async (req, res) => {
   try {
-    const { mobile, speed } = req.body;
+    const { mobile, speed, delay } = req.body;
     const collectionName = getDailyCollectionName();
     const Collection = mongoose.connection.collection(collectionName);
 
@@ -149,6 +148,7 @@ router.post('/hamibot/execute', authenticateToken, async (req, res) => {
         id: taskId,
         mobile: mobile,
         speed: speed,
+        delay: delay,
         data: item,
         status: 'pending',
         createdAt: new Date(),
@@ -177,7 +177,7 @@ router.post('/hamibot/stop', authenticateToken, async (req, res) => {
     taskQueue.length = 0;
     isProcessingQueue = false;
     // stop current task first
-    const res = await axios.delete(
+    const response = await axios.delete(
       `https://api.hamibot.com/v1/scripts/${process.env.HAMIBOT_SCRIPT_ID}/run`,
       {
         headers: {
@@ -187,15 +187,11 @@ router.post('/hamibot/stop', authenticateToken, async (req, res) => {
           devices: [{
             _id: process.env.HAMIBOT_DEVICE_ID,
             name: process.env.HAMIBOT_DEVICE_NAME
-          }],
-          vars: {
-            remoteUrl: data.url,
-            speed: speed
-          }
+          }]
         }
       }
     );
-    if (!res || res.status !== 204) {
+    if (!response || response.status !== 204) {
       throw new Error(`Hamibot API调用停止失败: ${response ? response.status : '无响应'}`);
     }
     res.json({ message: '所有任务已成功停止' });

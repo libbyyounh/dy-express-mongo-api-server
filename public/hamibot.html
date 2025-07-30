@@ -6,9 +6,16 @@
     <title>Hamibot脚本执行</title>
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/float-nav.css">
+    <style>
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+    </style>
 </head>
 <body>
-    <div class="">
+    <div class="container">
         <h1>Hamibot脚本执行</h1>
         <form id="hamibotForm">
             <div class="form-group">
@@ -22,6 +29,14 @@
                 <div class="radio-group">
                     <label><input type="radio" name="speed" value="a" checked> 普通</label>
                     <label><input type="radio" name="speed" value="b"> 慢</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>每个任务执行时间ms（必填）：</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="delay" value="150000" checked> 150000</label>
+                    <label><input type="radio" name="delay" value="230000"> 230000</label>
+                    <label><input type="radio" name="delay" value="300000"> 300000</label>
                 </div>
             </div>
             <button type="submit">开始调用远程脚本</button>

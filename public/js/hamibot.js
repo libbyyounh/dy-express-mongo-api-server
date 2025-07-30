@@ -125,6 +125,7 @@ document.getElementById('hamibotForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const mobile = document.getElementById('mobile').value;
     const speed = document.querySelector('input[name="speed"]:checked').value;
+    const delay = document.querySelector('input[name="delay"]:checked').value;
     // 从localStorage获取token
     const token = localStorage.getItem('token');
     if (!token) {
@@ -139,7 +140,7 @@ document.getElementById('hamibotForm').addEventListener('submit', async (e) => {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + token
             },
-            body: JSON.stringify({ mobile, speed })
+            body: JSON.stringify({ mobile, speed, delay })
         });
 
         if (!response.ok) throw new Error('提交失败');
