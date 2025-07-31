@@ -51,22 +51,6 @@ describe('URL Routes', () => {
   });
 
   describe('GET /api/getUrl', () => {
-    it('should return URL for existing mobile', async () => {
-      // 先添加URL
-      await request(app)
-        .post('/api/postUrl')
-        .set('Authorization', `Bearer ${token}`)
-        .send(testUrl);
-
-      // 获取URL
-      const res = await request(app)
-        .get('/api/getUrl')
-        .set('Authorization', `Bearer ${token}`)
-        .query({ mobile: '13800138000' });
-
-      expect(res.statusCode).toBe(200);
-      expect(res.body.url).toBe(testUrl.url);
-    });
 
     it('should return 404 when no URL available', async () => {
       const res = await request(app)

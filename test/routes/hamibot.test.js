@@ -76,6 +76,30 @@ describe('Hamibot Routes', () => {
 
       expect(res.statusCode).toBe(404);
     });
+
+    it('should handle 10 concurrent requests successfully', async () => {
+      // 创建10个并发请求
+      const requests = Array.from({ length: 10 }, () =>
+        request(app)
+          .post('/api/hamibot/execute')
+          .set('Authorization', `Bearer ${token}`)
+          .send({
+            mobile: '13800138000',
+            speed: 100,
+            delay: 1000
+          })
+      );
+
+      // 等待所有请求完成
+      const responses = await Promise.all(requests);
+
+      // 验证所有请求都返回202状态码
+      responses.forEach(res => {
+        expect(res.statusCode).toBe(202);
+        expect(res.body).toHaveProperty('taskIds');
+        expect(Array.isArray(res.body.taskIds)).toBe(true);
+      });
+    });
   });
 
   describe('POST /api/hamibot/stop', () => {
@@ -89,6 +113,24 @@ describe('Hamibot Routes', () => {
 
       expect(res.statusCode).toBe(200);
       expect(res.body.message).toContain('已成功停止');
+    });
+
+    it('should handle 10 concurrent stop requests successfully', async () => {
+      // 创建10个并发请求
+      const requests = Array.from({ length: 10 }, () =>
+        request(app)
+          .post('/api/hamibot/stop')
+          .set('Authorization', `Bearer ${token}`)
+      );
+
+      // 等待所有请求完成
+      const responses = await Promise.all(requests);
+
+      // 验证所有请求都返回200状态码
+      responses.forEach(res => {
+        expect(res.statusCode).toBe(200);
+        expect(res.body.message).toContain('已成功停止');
+      });
     });
   });
 });

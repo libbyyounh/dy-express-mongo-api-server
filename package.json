@@ -8,7 +8,12 @@
     "dev": "nodemon app.js",
     "test": "jest --forceExit --detectOpenHandles",
     "test:watch": "jest --watch --forceExit",
-    "test:coverage": "jest --coverage --forceExit"
+    "test:coverage": "jest --coverage --forceExit",
+    "test:auth": "jest --forceExit --detectOpenHandles test/routes/auth.test.js",
+    "test:urls": "jest --forceExit --detectOpenHandles test/routes/urls.test.js",
+    "test:hamibot": "jest --forceExit --detectOpenHandles test/routes/hamibot.test.js",
+    "test:mobiles": "jest --forceExit --detectOpenHandles test/routes/mobiles.test.js",
+    "test:users": "jest --forceExit --detectOpenHandles test/routes/users.test.js"
   },
   "dependencies": {
     "axios": "^1.11.0",
