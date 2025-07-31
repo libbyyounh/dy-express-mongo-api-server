@@ -71,13 +71,13 @@ function startLogPolling() {
             });
             if (!response.ok) throw new Error('获取日志失败');
             const logData = await response.json();
-            addLog('任务队列状态：' + logData.queueLength + '个任务待处理' + '，当前处理任务数：' + Number(logData.isProcessingQueue));
+            addLog('任务队列状态：' + logData.queueLength + '个任务待处理');
             logData.tasks.forEach(task => {
                 addLog(`任务 ${task.id}: ${task.status} ${task.error ? '错误：' + task.error : ''}`);
             });
 
             // 检查是否需要停止轮询
-            if (!logData.isProcessingQueue && logData.queueLength === 0) {
+            if (logData.queueLength === 0) {
                 addLog('所有任务已处理完成，停止日志轮询');
                 clearInterval(logIntervalId);
                 logIntervalId = null;
@@ -143,15 +143,19 @@ document.getElementById('hamibotForm').addEventListener('submit', async (e) => {
             body: JSON.stringify({ mobile, speed, delay })
         });
 
-        if (!response.ok) throw new Error('提交失败');
         const result = await response.json();
-        addLog('提交成功：' + result.message);
+        if (!response.ok) throw new Error(result.message);
+        let number = result.taskIds.length;
+        let totalMS = number * Number(delay);
+        let min = totalMS / 1000 / 60;
+        let time = new Date(totalMS + Date.now()).toLocaleTimeString();
+        addLog('提交成功：共' + number + '个任务，预计耗时' + min.toFixed(2) + '分钟，预计完成时间：' + time);
         
         // 表单提交成功后开始日志轮询
         addLog('开始监控任务执行状态...');
         startLogPolling();
     } catch (error) {
-        addLog('提交错误：' + error.message);
+        addLog('提交错误：' + error.message || '未知错误');
     }
 });
 
