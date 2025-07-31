@@ -1,6 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const Mobile = require('../models/Mobile');
+// 导入node-cache模块
+const NodeCache = require('node-cache');
+// 创建缓存实例，设置默认过期时间为5分钟(300000毫秒)
+const cache = new NodeCache({ stdTTL: 300 });
 
 /**
  * @swagger
@@ -18,7 +22,21 @@ const Mobile = require('../models/Mobile');
  */
 router.get('/mobiles', async (req, res) => {
   try {
+    // 尝试从缓存获取数据
+    const cacheKey = 'all_mobiles';
+    const cachedData = cache.get(cacheKey);
+
+    if (cachedData) {
+      // 如果缓存存在，直接返回缓存数据
+      return res.json(cachedData);
+    }
+
+    // 缓存不存在，从数据库获取数据
     const mobiles = await Mobile.find();
+    
+    // 将数据存入缓存
+    cache.set(cacheKey, mobiles);
+    
     res.json(mobiles);
   } catch (error) {
     console.error('Error getting mobiles:', error);
