@@ -255,6 +255,8 @@ router.get('/getAllUrl', async (req, res) => {
  *                 type: string
  *               isUsed:
  *                 type: boolean
+ *                 default: false
+ *                 description: "New value for isUsed status (default: false)"
  *     responses:
  *       200:
  *         description: URL updated successfully
@@ -497,9 +499,9 @@ router.post('/batch/delete', async (req, res) => {
 
 /**
  * @swagger
- * /api/batch/update-used: 
+ * /api/batch/update-used:
  *   post:
- *     summary: Batch update isUsed status to false
+ *     summary: Batch update isUsed status
  *     tags: [URLs]
  *     security:
  *       - bearerAuth: []
@@ -522,6 +524,10 @@ router.post('/batch/delete', async (req, res) => {
  *                 items:
  *                   type: string
  *                 description: Array of URL IDs to update
+ *               isUsed:
+ *                 type: boolean
+ *                 default: false
+ *                 description: "New value for isUsed status (default: false)"
  *     responses:
  *       200:
  *         description: URLs updated successfully
@@ -534,7 +540,7 @@ router.post('/batch/delete', async (req, res) => {
  */
 router.post('/batch/update-used', async (req, res) => {
   try {
-    const { date, ids } = req.body;
+    const { date, ids, isUsed = false } = req.body;
 
     // Validate input
     if (!date || !/^\d{8}$/.test(date)) {
@@ -555,7 +561,7 @@ router.post('/batch/update-used', async (req, res) => {
     const UrlModel = createUrlModel(collectionName);
     const result = await UrlModel.updateMany(
       { _id: { $in: ids } },
-      { $set: { isUsed: false } }
+      { $set: { isUsed } }
     );
 
     res.json({

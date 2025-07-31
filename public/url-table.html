@@ -90,6 +90,9 @@
             gap: 10px;
             margin-bottom: 1rem;
         }
+        .table-container tr > th:not(:first-child) {
+            min-width: 80px;
+        }
         .btn-delete {
             padding: 0.5rem 1rem;
             background-color: #dc3545;
@@ -140,8 +143,9 @@
         
         <!-- 将操作按钮移到表格容器外 -->
         <div class="table-actions" style="margin-bottom: 1rem; display: none;" id="tableActions">
-            <button id="multipleDel" class="btn-delete" onclick="batchDelete()">批量删除</button>
-            <button id="multipleSwitch" class="btn-switch" onclick="batchSwitchUsed()">批量切换使用状态</button>
+            <button id="multipleDel" disabled class="btn-delete" onclick="batchDelete()">批量删除</button>
+            <button id="multipleSwitch" disabled class="btn-switch" onclick="batchSwitchUsed(false)">批量设置未使用</button>
+            <button id="multipleSetUsed" disabled class="btn-switch" style="background-color: #ffc107;" onclick="batchSwitchUsed(true)">批量设置已使用</button>
         </div>
         
         <div class="table-container" id="tableContainer"></div>

@@ -89,7 +89,7 @@ function renderTable(headers, rows) {
     const checkboxHeader = document.createElement('th');
     const selectAllContainer = document.createElement('div');
     selectAllContainer.className = 'select-all-container';
-    selectAllContainer.innerHTML = '<input type="checkbox" id="selectAll"> <label for="selectAll">全选</label>';
+    selectAllContainer.innerHTML = '<input type="checkbox" id="selectAll"> <label for="selectAll"></label>';
     checkboxHeader.appendChild(selectAllContainer);
     headerRow.appendChild(checkboxHeader);
 
@@ -115,6 +115,10 @@ function renderTable(headers, rows) {
                 td.innerHTML = String(row[header] !== undefined ? row[header] : '').replace(/^(.*)https(.*)$/, function (match, p1, p2) {
                     return p1 + '<a target="_blank" rel="noopener noreferrer" href="https' + p2 + '">https' + p2 + '</a>';
                 });
+            } else if (header === 'isUsed') {
+                td.textContent = row[header] ? '已使用' : '未使用';
+            } else if (header === 'disabled') {
+                td.textContent = row[header] ? '已禁用' : '未禁用';
             } else {
                 td.textContent = row[header] !== undefined ? row[header] : '';
             }
@@ -148,9 +152,11 @@ function updateActionButtons() {
     const checkedCount = document.querySelectorAll('.row-checkbox:checked').length;
     const multipleDel = document.getElementById('multipleDel');
     const multipleSwitch = document.getElementById('multipleSwitch');
+    const multipleSetUsed = document.getElementById('multipleSetUsed');
 
     multipleDel.disabled = checkedCount === 0;
     multipleSwitch.disabled = checkedCount === 0;
+    multipleSetUsed.disabled = checkedCount === 0;
 }
 
 // 批量删除功能
@@ -199,7 +205,7 @@ async function batchDelete() {
 }
 
 // 批量切换使用状态功能
-async function batchSwitchUsed() {
+async function batchSwitchUsed(isUsed = false) {
     const checkedIds = Array.from(document.querySelectorAll('.row-checkbox:checked'))
         .map(checkbox => checkbox.dataset.id);
 
@@ -221,7 +227,8 @@ async function batchSwitchUsed() {
             },
             body: JSON.stringify({
                 date: formattedDate,
-                ids: checkedIds
+                ids: checkedIds,
+                isUsed: isUsed
             })
         });
 
@@ -231,7 +238,8 @@ async function batchSwitchUsed() {
             throw new Error(data.message || '批量更新失败');
         }
 
-        showError(`成功更新${data.modifiedCount}条数据的使用状态`, 'success');
+        const statusText = isUsed ? '已使用' : '未使用';
+        showError(`成功更新${data.modifiedCount}条数据的使用状态为${statusText}`, 'success');
         // 重新加载数据
         fetchTableData();
     } catch (error) {
@@ -270,9 +278,9 @@ function formatHeaderName(header) {
         url: 'URL地址',
         mobile: '手机号',
         type: '类型',
-        isUsed: '是否使用',
+        isUsed: '使用状态',
         createTime: '创建时间',
-        disabled: '是否禁用'
+        disabled: '禁用状态'
     };
     return headerMap[header] || header;
 }
