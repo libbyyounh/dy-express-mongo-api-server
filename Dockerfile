@@ -11,7 +11,8 @@ COPY package*.json ./
 
 # 设置国内npm源
 RUN npm config set registry https://registry.npmmirror.com && \
-    npm install --production
+    npm install -g pnpm && \
+    pnpm install --production
 
 # 复制整个项目目录
 COPY . .
