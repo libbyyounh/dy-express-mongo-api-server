@@ -111,7 +111,13 @@ function renderTable(headers, rows) {
 
         headers.forEach(header => {
             const td = document.createElement('td');
-            td.textContent = row[header] !== undefined ? row[header] : '';
+            if (header === 'url') {
+                td.innerHTML = String(row[header] !== undefined ? row[header] : '').replace(/^(.*)https(.*)$/, function (match, p1, p2) {
+                    return p1 + '<a target="_blank" rel="noopener noreferrer" href="https' + p2 + '">https' + p2 + '</a>';
+                });
+            } else {
+                td.textContent = row[header] !== undefined ? row[header] : '';
+            }
             tr.appendChild(td);
         });
         tbody.appendChild(tr);
