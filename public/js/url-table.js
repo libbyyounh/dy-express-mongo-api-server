@@ -116,9 +116,9 @@ function renderTable(headers, rows) {
                     return p1 + '<a target="_blank" rel="noopener noreferrer" href="https' + p2 + '">https' + p2 + '</a>';
                 });
             } else if (header === 'isUsed') {
-                td.textContent = row[header] ? '已使用' : '未使用';
+                td.innerHTML = row[header] ? '<span class="disable-text">已使用</span>' : '<span class="enable-text">未使用</span>';
             } else if (header === 'disabled') {
-                td.textContent = row[header] ? '已禁用' : '未禁用';
+                td.innerHTML = row[header] ? '<span class="disable-text">已禁用</span>' : '<span class="enable-text">未禁用</span>';
             } else {
                 td.textContent = row[header] !== undefined ? row[header] : '';
             }
