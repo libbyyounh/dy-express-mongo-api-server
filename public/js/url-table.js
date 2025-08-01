@@ -83,7 +83,7 @@ function renderTable(headers, rows) {
     const thead = document.createElement('thead');
     const tbody = document.createElement('tbody');
 
-    // 创建表头（添加复选框列）
+    // 创建表头（添加复选框列和序号列）
     const headerRow = document.createElement('tr');
     // 添加全选复选框
     const checkboxHeader = document.createElement('th');
@@ -93,6 +93,11 @@ function renderTable(headers, rows) {
     checkboxHeader.appendChild(selectAllContainer);
     headerRow.appendChild(checkboxHeader);
 
+    // 添加序号表头
+    const serialHeader = document.createElement('th');
+    serialHeader.textContent = '序号';
+    headerRow.appendChild(serialHeader);
+
     headers.forEach(header => {
         const th = document.createElement('th');
         th.textContent = formatHeaderName(header);
@@ -100,14 +105,19 @@ function renderTable(headers, rows) {
     });
     thead.appendChild(headerRow);
 
-    // 创建表格内容（添加复选框列）
-    rows.forEach(row => {
+    // 创建表格内容（添加复选框列和序号列）
+    rows.forEach((row, index) => {
         const tr = document.createElement('tr');
         // 添加行复选框
         const checkboxCell = document.createElement('td');
         checkboxCell.className = 'checkbox-cell';
         checkboxCell.innerHTML = `<input type="checkbox" class="row-checkbox" data-id="${row._id}">`;
         tr.appendChild(checkboxCell);
+
+        // 添加序号列
+        const serialCell = document.createElement('td');
+        serialCell.textContent = index + 1;
+        tr.appendChild(serialCell);
 
         headers.forEach(header => {
             const td = document.createElement('td');
