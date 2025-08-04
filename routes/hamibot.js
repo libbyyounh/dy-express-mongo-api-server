@@ -105,29 +105,32 @@ const processTask = async (task) => {
   processingTasks.add(task.id);
   try {
     console.log('running taskQueue index:' + task.index);
-    // stop current task first
-    const resStop = await axiosInstance.delete(
-      `https://api.hamibot.com/v1/scripts/${process.env.HAMIBOT_SCRIPT_ID}/run`,
-      {
-        headers: {
-          'authorization': `${process.env.HAMIBOT_TOKEN}`
-        },
-        data: {
-          devices: [{
-            _id: process.env.HAMIBOT_DEVICE_ID,
-            name: process.env.HAMIBOT_DEVICE_NAME
-          }],
-          vars: {
-            remoteUrl: task.data.url,
-            speed: task.speed
+    // 非第一个任务，先停止上一个任务
+    if (task.index > 0) {
+      // stop current task first
+      const resStop = await axiosInstance.delete(
+        `https://api.hamibot.com/v1/scripts/${process.env.HAMIBOT_SCRIPT_ID}/run`,
+        {
+          headers: {
+            'authorization': `${process.env.HAMIBOT_TOKEN}`
+          },
+          data: {
+            devices: [{
+              _id: process.env.HAMIBOT_DEVICE_ID,
+              name: process.env.HAMIBOT_DEVICE_NAME
+            }],
+            vars: {
+              remoteUrl: task.data.url,
+              speed: task.speed
+            }
           }
         }
+      );
+      if (!resStop || resStop.status !== 204) {
+        throw new Error(`Hamibot API调用停止失败: ${resStop ? resStop.status : '无响应'}`);
       }
-    );
-    if (!resStop || resStop.status !== 204) {
-      throw new Error(`Hamibot API调用停止失败: ${resStop ? resStop.status : '无响应'}`);
+      console.log('stop Hamibot task success');
     }
-    console.log('stop Hamibot task success');
 
     // 添加延迟，避免请求过于频繁
     await new Promise(resolve => setTimeout(resolve, 5000));
