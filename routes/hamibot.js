@@ -130,10 +130,9 @@ const processTask = async (task) => {
         throw new Error(`Hamibot API调用停止失败: ${resStop ? resStop.status : '无响应'}`);
       }
       console.log('stop Hamibot task success');
+      // 添加延迟，避免请求过于频繁
+      await new Promise(resolve => setTimeout(resolve, 5000));
     }
-
-    // 添加延迟，避免请求过于频繁
-    await new Promise(resolve => setTimeout(resolve, 5000));
 
     // Call Hamibot API
     const response = await axiosInstance.post(
