@@ -149,7 +149,7 @@ document.getElementById('hamibotForm').addEventListener('submit', async (e) => {
         let totalMS = number * Number(delay);
         let min = totalMS / 1000 / 60;
         let time = new Date(totalMS + Date.now()).toLocaleTimeString();
-        addLog('提交成功：共' + number + '个任务，预计耗时' + min.toFixed(2) + '分钟，预计完成时间：' + time);
+        addLog('提交成功：共' + number + '个任务，预计耗时' + min.toFixed(2) + '分钟，预计完成时间：' + time + ",collectionName: " + result.collectionName);
         
         // 表单提交成功后开始日志轮询
         addLog('开始监控任务执行状态...');
