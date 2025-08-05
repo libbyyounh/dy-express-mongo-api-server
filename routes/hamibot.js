@@ -285,7 +285,7 @@ router.post('/hamibot/execute', authenticateToken, async (req, res) => {
     processTaskQueue();
 
     res.status(202).json({
-      message: `Task queue created with ${dataItems.length} items`,
+      message: `Task queue created with ${dataItems.length} items. Collection: ${collectionName}`,
       taskIds: taskIds
     });
 
