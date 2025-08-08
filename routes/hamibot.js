@@ -475,4 +475,9 @@ const apiLimiter = rateLimit({
 
 // 为所有URLs接口应用限流
 router.use(apiLimiter);
-module.exports = { router };
+// 在文件末尾添加导出语句
+module.exports = {
+  router,
+  startTaskPolling,
+  stopTaskPolling
+};

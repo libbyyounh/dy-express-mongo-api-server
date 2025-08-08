@@ -3,10 +3,13 @@ const { MongoMemoryServer } = require('mongodb-memory-server');
 require('dotenv').config();
 const app = require('../app');
 const { initializeDatabase } = require('../utils/dbSetup');
-// 导入任务队列清理函数
-const { clearTaskQueue } = require('../routes/hamibot');
+// 导入任务轮询控制函数
+const { stopTaskPolling } = require('../routes/hamibot');
 
 let mongoServer;
+
+// 增加测试超时时间
+jest.setTimeout(30000); // 设置为30秒
 
 // 在所有测试之前启动内存MongoDB并连接
 beforeAll(async () => {
@@ -20,15 +23,15 @@ beforeAll(async () => {
 
 // 在所有测试之后关闭连接并停止内存MongoDB
 afterAll(async () => {
+  // 停止任务轮询
+  stopTaskPolling();
   await mongoose.disconnect();
   await mongoServer.stop();
 });
 
 // 在每个测试之后清理数据库
 afterEach(async () => {
-  // 先清理任务队列防止数据库操作冲突
-  clearTaskQueue();
-  // 再清理数据库集合
+  // 清理数据库集合
   const collections = await mongoose.connection.db.collections();
   for (const collection of collections) {
     await collection.deleteMany({});
