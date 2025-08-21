@@ -9,6 +9,10 @@ const mobileSchema = new mongoose.Schema({
   disabled: {
     type: Boolean,
     default: false
+  },
+  type: {
+    type: String,
+    default: 'A'
   }
 }, {
   timestamps: true
