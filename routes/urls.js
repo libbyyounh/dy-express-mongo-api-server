@@ -12,6 +12,7 @@ require('dotenv').config();
 // 从环境变量获取配置，提供默认值
 const MAX_COLLECTIONS = parseInt(process.env.MAX_COLLECTIONS) || 14;
 const URLS_PER_MOBILE = parseInt(process.env.URLS_PER_MOBILE) || 6;
+const URLS_PER_MOBILE_B = parseInt(process.env.URLS_PER_MOBILE_B) || 6; // 新增B类型限制
 
 const { createUrlModel, getTodayCollectionName, getTomorrowCollectionName, createDailyCollection } = require('../utils/dbSetup');
 
@@ -45,10 +46,15 @@ const { createUrlModel, getTodayCollectionName, getTomorrowCollectionName, creat
  */
 router.post('/postUrl', async (req, res) => {
   try {
-    const { url } = req.body;
+    const { url, type = 'A' } = req.body; // 获取type参数，默认为A
     
     if (!url) {
       return res.status(400).json({ message: 'Valid URL is required' });
+    }
+    
+    // 验证type值
+    if (!['A', 'B'].includes(type)) {
+      return res.status(400).json({ message: 'Invalid type. Must be A or B' });
     }
     
     // 获取所有日期命名的集合并按日期排序
@@ -66,16 +72,19 @@ router.post('/postUrl', async (req, res) => {
       });
     }
     
-    // 获取活跃的手机号
+    // 获取活跃的手机号，并根据type筛选
     // 从缓存获取活跃手机号
-    let mobiles = cache.get('active_mobiles');
+    let mobiles = cache.get(`active_mobiles_${type}`);
     if (!mobiles) {
-      mobiles = await Mobile.find({ disabled: false });
-      cache.set('active_mobiles', mobiles); // 缓存结果
+      mobiles = await Mobile.find({ disabled: false, type });
+      cache.set(`active_mobiles_${type}`, mobiles); // 缓存结果
     }
     if (mobiles.length === 0) {
-      return res.status(500).json({ message: 'No active mobile numbers available' });
+      return res.status(500).json({ message: `No active mobile numbers available for type ${type}` });
     }
+    
+    // 确定使用的限制常量
+    const urlsPerMobile = type === 'A' ? URLS_PER_MOBILE : URLS_PER_MOBILE_B;
     
     // 逐级查找下一个可用的集合（今天→明天→后天...）
     let currentDate = moment();
@@ -101,9 +110,10 @@ router.post('/postUrl', async (req, res) => {
       } else {
         // 集合已存在，检查是否有空间
         UrlModel = createUrlModel(collectionName);
-        count = await UrlModel.countDocuments();
+        // 只统计相同type的URL数量
+        count = await UrlModel.countDocuments({ type });
         
-        if (count < mobiles.length * URLS_PER_MOBILE) {
+        if (count < mobiles.length * urlsPerMobile) {
           // 找到有空间的集合
           foundAvailableCollection = true;
           break;
@@ -116,18 +126,19 @@ router.post('/postUrl', async (req, res) => {
     
     if (!foundAvailableCollection) {
       return res.status(400).json({
-        message: '所有可用集合都已满，不能再添加URL。请清理旧集合后再试。'
+        message: `所有可用集合都已满，不能再添加type=${type}的URL。请清理旧集合后再试。`
       });
     }
     
-    // 确定要使用的手机号（每URLS_PER_MOBILE个条目轮换一次）
-    const mobileIndex = Math.floor(count / URLS_PER_MOBILE) % mobiles.length;
+    // 确定要使用的手机号（每urlsPerMobile个条目轮换一次）
+    const mobileIndex = Math.floor(count / urlsPerMobile) % mobiles.length;
     const mobile = mobiles[mobileIndex].mobile;
     
-    // 创建新URL条目
+    // 创建新URL条目，包含type
     const newUrl = new UrlModel({
       url,
       mobile,
+      type,
       createTime: moment().format('YYYY-MM-DD HH:mm:ss')
     });
     
@@ -167,7 +178,7 @@ router.post('/postUrl', async (req, res) => {
  */
 router.get('/getUrl', async (req, res) => {
   try {
-    const { mobile } = req.query;
+    const { mobile, type } = req.query;
     const collectionName = getTodayCollectionName();
     const UrlModel = createUrlModel(collectionName);
     
@@ -175,6 +186,9 @@ router.get('/getUrl', async (req, res) => {
     const query = { isUsed: false, disabled: false };
     if (mobile) {
       query.mobile = mobile;
+    }
+    if (type) {
+      query.type = type;
     }
     
     // Find first matching URL
@@ -205,6 +219,11 @@ router.get('/getUrl', async (req, res) => {
  *         schema:
  *           type: string
  *         description: Optional mobile number filter
+ *       - in: query
+ *         name: type
+ *         schema:
+ *           type: string
+ *         description: Optional type filter
  *     responses:
  *       200:
  *         description: List of matching URLs
@@ -213,7 +232,7 @@ router.get('/getUrl', async (req, res) => {
  */
 router.get('/getAllUrl', async (req, res) => {
   try {
-    const { mobile } = req.query;
+    const { mobile, type } = req.query;
     const collectionName = getTodayCollectionName();
     const UrlModel = createUrlModel(collectionName);
     
@@ -221,6 +240,9 @@ router.get('/getAllUrl', async (req, res) => {
     const query = { isUsed: false, disabled: false };
     if (mobile) {
       query.mobile = mobile;
+    }
+    if (type) {
+      query.type = type;
     }
     
     // Find all matching URLs

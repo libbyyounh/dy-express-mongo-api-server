@@ -154,7 +154,13 @@ const initializeDatabase = async () => {
       console.log('Running daily collection creation job');
       await createDailyCollection();
     });
-    
+
+    // Schedule weekly cleanup of old collections every Monday at 00:10:00
+    schedule.scheduleJob('0 10 0 * * 1', async () => {
+      console.log('Running weekly cleanup of old collections job');
+      await cleanupOldCollections();
+    });
+
     console.log('Database initialization completed');
   } catch (error) {
     console.error('Error initializing database:', error);
