@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>shopping card 收集工具 - 首页</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/float-nav.css">
+</head>
+<body>
+    <div class="container">
+        <h1>shopping card 收集工具</h1>
+        <div class="url-input-section">
+            <input type="text" id="urlInput" placeholder="请输入URL..." autocomplete="off">
+            <button id="pasteBtn" class="btn secondary">粘贴</button>
+        </div>
+        <button id="submitBtn" class="btn primary">确定</button>
+    </div>
+    <script src="/js/shoppingCard.js"></script>
+    <script src="/js/float-nav.js"></script>
+    <script>
+        // 初始化浮动导航，当前页面为shoppingCard
+        initFloatNav('shoppingCard');
+    </script>
+</body>
+</html>

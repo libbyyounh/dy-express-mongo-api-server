@@ -8,6 +8,10 @@ function initFloatNav(currentPage) {
                     <span>首页</span>
                     <span class="float-nav-label">首页</span>
                 </a>
+                <a href="/shoppingCard.html" class="float-nav-item" ${currentPage === 'shoppingCard' ? 'style="display:none"' : ''}>
+                    <span>购物车</span>
+                    <span class="float-nav-label">购物车工具</span>
+                </a>
                 <a href="/hamibot.html" class="float-nav-item" ${currentPage === 'hamibot' ? 'style="display:none"' : ''}>
                     <span>脚本</span>
                     <span class="float-nav-label">脚本执行</span>
