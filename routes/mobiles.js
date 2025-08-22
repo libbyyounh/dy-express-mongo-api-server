@@ -10,10 +10,16 @@ const cache = new NodeCache({ stdTTL: 300 });
  * @swagger
  * /api/mobiles:
  *   get:
- *     summary: Get all mobile numbers
+ *     summary: Get mobile numbers by type or all mobile numbers
  *     tags: [Mobiles]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: type
+ *         schema:
+ *           type: string
+ *         description: Filter mobile numbers by type (optional)
  *     responses:
  *       200:
  *         description: List of mobile numbers
@@ -22,19 +28,20 @@ const cache = new NodeCache({ stdTTL: 300 });
  */
 router.get('/mobiles', async (req, res) => {
   try {
-    // 尝试从缓存获取数据
-    const cacheKey = 'all_mobiles';
+    const { type } = req.query;
+    
+    // 构建缓存键，包含type参数
+    const cacheKey = type ? `mobiles_type_${type}` : 'all_mobiles';
     const cachedData = cache.get(cacheKey);
 
     if (cachedData) {
-      // 如果缓存存在，直接返回缓存数据
       return res.json(cachedData);
     }
 
-    // 缓存不存在，从数据库获取数据
-    const mobiles = await Mobile.find();
+    // 根据是否有type参数构建查询条件
+    const query = type ? { type } : {};
+    const mobiles = await Mobile.find(query);
     
-    // 将数据存入缓存
     cache.set(cacheKey, mobiles);
     
     res.json(mobiles);
