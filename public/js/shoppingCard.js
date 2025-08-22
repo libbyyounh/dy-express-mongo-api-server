@@ -15,8 +15,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const params = {};
         const pathParts = window.location.pathname.split('/');
         if (pathParts.length >= 3) {
-            params.mobile = pathParts[1];
-            params.id = pathParts[2];
+            params.mobile = pathParts.at(-2);
+            params.id = pathParts.at(-1);
         }
         return params;
     }

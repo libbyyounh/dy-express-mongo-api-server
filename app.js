@@ -22,6 +22,14 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
+
+// 新增路由: /shoppingCard/:mobile/:id
+// 先定义动态路由
+app.get('/shoppingCard/:mobile/:id', (req, res) => {
+  console.log('Received request for mobile:', req.params.mobile, 'id:', req.params.id);
+  res.sendFile(path.join(__dirname, 'public', 'shoppingCard.html'));
+});
+
 // Serve static files
 app.use(express.static('public'));
 
@@ -86,15 +94,7 @@ app.use('/api', shoppingCardRoutes); // 新增
 app.use('/api/users', authenticateToken, usersRouter);
 
 
-// 新增路由: /shoppingCard/:mobile/:id
-// 先定义动态路由
-app.get('/shoppingCard/:mobile/:id', (req, res) => {
-  console.log('Received request for mobile:', req.params.mobile, 'id:', req.params.id);
-  res.sendFile(path.join(__dirname, 'public', 'shoppingCard.html'));
-});
 
-// 再定义静态文件中间件
-app.use(express.static('public'));
 
 // Root route serves the main application
 app.get('/', (req, res) => {
