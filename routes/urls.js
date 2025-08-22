@@ -36,6 +36,14 @@ const { createUrlModel, getTodayCollectionName, getTomorrowCollectionName, creat
  *               url:
  *                 type: string
  *                 format: uri
+ *               type:
+ *                 type: string
+ *                 enum: [A, B]
+ *                 default: A
+ *               mobile:
+ *                 type: string
+ *               remark:
+ *                 type: string
  *     responses:
  *       201:
  *         description: URL added successfully
@@ -46,17 +54,26 @@ const { createUrlModel, getTodayCollectionName, getTomorrowCollectionName, creat
  */
 router.post('/postUrl', async (req, res) => {
   try {
-    const { url, type = 'A' } = req.body; // 获取type参数，默认为A
-    
+    const { url, type = 'A', mobile, remark = '' } = req.body; // 获取mobile和remark参数
+
     if (!url) {
       return res.status(400).json({ message: 'Valid URL is required' });
     }
-    
+
     // 验证type值
     if (!['A', 'B'].includes(type)) {
       return res.status(400).json({ message: 'Invalid type. Must be A or B' });
     }
-    
+
+    // 如果提供了mobile，验证该手机号是否存在
+    let targetMobile = null;
+    if (mobile) {
+      targetMobile = await Mobile.findOne({ mobile, disabled: false, type });
+      if (!targetMobile) {
+        return res.status(400).json({ message: `无效的手机号或该手机号类型不是${type}` });
+      }
+    }
+
     // 获取所有日期命名的集合并按日期排序
     const collections = await mongoose.connection.db.listCollections().toArray();
     const dateCollections = collections
@@ -64,41 +81,44 @@ router.post('/postUrl', async (req, res) => {
       .map(col => ({ name: col.name, date: moment(col.name, 'YYYYMMDD') }))
       .filter(col => col.date.isValid())
       .sort((a, b) => a.date.diff(b.date));
-    
+
     // 检查是否已达到最大集合限制
     if (dateCollections.length >= MAX_COLLECTIONS) {
       return res.status(400).json({
         message: `已达到最大集合限制（${MAX_COLLECTIONS}个），不能再添加URL。请清理旧集合后再试。`
       });
     }
-    
-    // 获取活跃的手机号，并根据type筛选
-    // 从缓存获取活跃手机号
-    let mobiles = cache.get(`active_mobiles_${type}`);
-    if (!mobiles) {
-      mobiles = await Mobile.find({ disabled: false, type });
-      cache.set(`active_mobiles_${type}`, mobiles); // 缓存结果
+
+    // 如果没有提供mobile，获取活跃的手机号
+    let mobiles = [];
+    if (!mobile) {
+      // 从缓存获取活跃手机号
+      mobiles = cache.get(`active_mobiles_${type}`);
+      if (!mobiles) {
+        mobiles = await Mobile.find({ disabled: false, type });
+        cache.set(`active_mobiles_${type}`, mobiles); // 缓存结果
+      }
+      if (mobiles.length === 0) {
+        return res.status(500).json({ message: `No active mobile numbers available for type ${type}` });
+      }
     }
-    if (mobiles.length === 0) {
-      return res.status(500).json({ message: `No active mobile numbers available for type ${type}` });
-    }
-    
+
     // 确定使用的限制常量
     const urlsPerMobile = type === 'A' ? URLS_PER_MOBILE : URLS_PER_MOBILE_B;
-    
+
     // 逐级查找下一个可用的集合（今天→明天→后天...）
     let currentDate = moment();
     let collectionName, UrlModel, count;
     let foundAvailableCollection = false;
     const maxDaysToCheck = MAX_COLLECTIONS - dateCollections.length;
-    
+
     // 最多检查未来maxDaysToCheck天（确保不超过最大集合限制）
     for (let i = 0; i < maxDaysToCheck; i++) {
       collectionName = currentDate.format('YYYYMMDD');
-      
+
       // 检查集合是否存在
       const collectionExists = dateCollections.some(col => col.name === collectionName);
-      
+
       if (!collectionExists) {
         // 创建新集合
         UrlModel = createUrlModel(collectionName);
@@ -112,38 +132,52 @@ router.post('/postUrl', async (req, res) => {
         UrlModel = createUrlModel(collectionName);
         // 只统计相同type的URL数量
         count = await UrlModel.countDocuments({ type });
-        
-        if (count < mobiles.length * urlsPerMobile) {
+
+        // 如果提供了mobile，只需检查该mobile是否还有名额
+        if (mobile) {
+          const mobileCount = await UrlModel.countDocuments({ type, mobile });
+          if (mobileCount < urlsPerMobile) {
+            foundAvailableCollection = true;
+            break;
+          }
+        } else if (count < mobiles.length * urlsPerMobile) {
           // 找到有空间的集合
           foundAvailableCollection = true;
           break;
         }
       }
-      
+
       // 当前日期集合已满，检查下一天
       currentDate.add(1, 'day');
     }
-    
+
     if (!foundAvailableCollection) {
       return res.status(400).json({
         message: `所有可用集合都已满，不能再添加type=${type}的URL。请清理旧集合后再试。`
       });
     }
-    
-    // 确定要使用的手机号（每urlsPerMobile个条目轮换一次）
-    const mobileIndex = Math.floor(count / urlsPerMobile) % mobiles.length;
-    const mobile = mobiles[mobileIndex].mobile;
-    
-    // 创建新URL条目，包含type
+
+    // 确定要使用的手机号
+    let selectedMobile;
+    if (mobile) {
+      selectedMobile = mobile;
+    } else {
+      // 每urlsPerMobile个条目轮换一次
+      const mobileIndex = Math.floor(count / urlsPerMobile) % mobiles.length;
+      selectedMobile = mobiles[mobileIndex].mobile;
+    }
+
+    // 创建新URL条目，包含type和remark
     const newUrl = new UrlModel({
       url,
-      mobile,
+      mobile: selectedMobile,
       type,
+      remark, // 添加remark字段
       createTime: moment().format('YYYY-MM-DD HH:mm:ss')
     });
-    
+
     await newUrl.save();
-    
+
     res.status(201).json({
       message: `URL added successfully, collection: ${collectionName}, count: ${count + 1}`,
       data: newUrl

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>添加购物卡列表</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/float-nav.css">
+    <style>
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+        select, input[type="text"] {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        textarea {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            min-height: 100px;
+        }
+        .btn {
+            padding: 0.5rem 1rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .required::after {
+            content: " *";
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>添加购物卡列表</h1>
+        <div id="errorMessage" class="error" style="display: none;"></div>
+        <div id="successMessage" class="success" style="display: none;"></div>
+        <form id="shoppingCardForm">
+            <div class="form-group">
+                <label for="mobile" class="required">手机号</label>
+                <select id="mobile" name="mobile" required>
+                    <option value="">请选择手机号</option>
+                    <!-- 选项将通过JavaScript动态加载 -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="url" class="required">URL地址</label>
+                <input type="text" id="url" name="url" placeholder="请输入URL" required>
+            </div>
+            <div class="form-group">
+                <label for="remark">备注信息</label>
+                <textarea id="remark" name="remark" placeholder="请输入备注信息（选填）"></textarea>
+            </div>
+            <button type="submit" class="btn primary">提交</button>
+        </form>
+    </div>
+
+    <script src="/js/shoppingCardListAdd.js"></script>
+    <script src="/js/float-nav.js"></script>
+    <script>
+        // 初始化浮动导航
+        initFloatNav('shoppingCardListAdd');
+    </script>
+</body>
+</html>

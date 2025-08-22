@@ -9,10 +9,10 @@ const swaggerUi = require('swagger-ui-express');
 const { authenticateToken } = require('./middleware/auth');
 const { initializeDatabase, createDailyCollection, cleanupOldCollections } = require('./utils/dbSetup');
 const authRoutes = require('./routes/auth');
-const urlRoutes = require('./routes/urls');
-const mobileRoutes = require('./routes/mobiles');
-// 修改hamibot路由导入方式
-const { router: hamibotRouter } = require('./routes/hamibot');
+const urlsRoutes = require('./routes/urls');
+const mobilesRoutes = require('./routes/mobiles');
+const { router: hamibotRoutes } = require('./routes/hamibot');
+const shoppingCardRoutes = require('./routes/shoppingCard'); // 新增
 const usersRouter = require('./routes/users');
 
 // Initialize Express app
@@ -79,10 +79,22 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // Routes
 app.use('/api', authRoutes);
-app.use('/api', authenticateToken, urlRoutes);
-app.use('/api', authenticateToken, mobileRoutes);
-app.use('/api', authenticateToken, hamibotRouter);
+app.use('/api', urlsRoutes);
+app.use('/api', mobilesRoutes);
+app.use('/api', hamibotRoutes);
+app.use('/api', shoppingCardRoutes); // 新增
 app.use('/api/users', authenticateToken, usersRouter);
+
+
+// 新增路由: /shoppingCard/:mobile/:id
+// 先定义动态路由
+app.get('/shoppingCard/:mobile/:id', (req, res) => {
+  console.log('Received request for mobile:', req.params.mobile, 'id:', req.params.id);
+  res.sendFile(path.join(__dirname, 'public', 'shoppingCard.html'));
+});
+
+// 再定义静态文件中间件
+app.use(express.static('public'));
 
 // Root route serves the main application
 app.get('/', (req, res) => {

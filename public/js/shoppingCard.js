@@ -10,6 +10,17 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
+    // 获取URL参数
+    function getUrlParams() {
+        const params = {};
+        const pathParts = window.location.pathname.split('/');
+        if (pathParts.length >= 3) {
+            params.mobile = pathParts[1];
+            params.id = pathParts[2];
+        }
+        return params;
+    }
+
     // 粘贴按钮功能
     pasteBtn.addEventListener('click', async () => {
         try {
@@ -31,13 +42,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
+            // 获取URL参数
+            const { mobile, id } = getUrlParams();
+
+            // 准备请求体
+            const requestBody = { url: url, type: 'B' };
+            if (mobile) requestBody.mobile = mobile;
+            if (id) requestBody.remark = id;
+
             const response = await fetch('/api/postUrl', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ url: url, type: 'B' })
+                body: JSON.stringify(requestBody)
             });
 
             const data = await response.json();

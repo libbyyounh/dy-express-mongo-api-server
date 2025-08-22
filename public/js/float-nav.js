@@ -12,6 +12,14 @@ function initFloatNav(currentPage) {
                     <span>购物车</span>
                     <span class="float-nav-label">购物车工具</span>
                 </a>
+                <a href="/shoppingCard-table.html" class="float-nav-item" ${currentPage === 'shoppingCard-table' ? 'style="display:none"' : ''}>
+                    <span>购物表</span>
+                    <span class="float-nav-label">购物表</span>
+                </a>
+                <a href="/shoppingCardListAdd.html" class="float-nav-item" ${currentPage === 'shoppingCardListAdd' ? 'style="display:none"' : ''}>
+                    <span>加车</span>
+                    <span class="float-nav-label">加车</span>
+                </a>
                 <a href="/hamibot.html" class="float-nav-item" ${currentPage === 'hamibot' ? 'style="display:none"' : ''}>
                     <span>脚本</span>
                     <span class="float-nav-label">脚本执行</span>
