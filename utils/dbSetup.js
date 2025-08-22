@@ -30,6 +30,10 @@ const createUrlModel = (collectionName) => {
     disabled: {
       type: Boolean,
       default: false
+    },
+    remark: {
+      type: String,
+      default: ''
     }
   });
 
