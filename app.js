@@ -7,6 +7,7 @@ const cors = require('cors');
 const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 const { authenticateToken } = require('./middleware/auth');
+const { isAdmin, apiRoleCheck } = require('./middleware/roleCheck');
 const { initializeDatabase, createDailyCollection, cleanupOldCollections } = require('./utils/dbSetup');
 const authRoutes = require('./routes/auth');
 const urlsRoutes = require('./routes/urls');
@@ -86,12 +87,15 @@ const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // Routes
+// 修改API路由注册，添加认证和角色检查中间件
 app.use('/api', authRoutes);
-app.use('/api', urlsRoutes);
-app.use('/api', mobilesRoutes);
-app.use('/api', hamibotRoutes);
-app.use('/api', shoppingCardRoutes); // 新增
-app.use('/api/users', authenticateToken, usersRouter);
+app.use('/api', authenticateToken, apiRoleCheck, urlsRoutes);
+app.use('/api', authenticateToken, apiRoleCheck, mobilesRoutes);
+app.use('/api', authenticateToken, apiRoleCheck, hamibotRoutes);
+app.use('/api', authenticateToken, apiRoleCheck, shoppingCardRoutes);
+
+// 用户路由已经有authenticateToken中间件，添加apiRoleCheck
+app.use('/api/users', authenticateToken, apiRoleCheck, usersRouter);
 
 
 
@@ -101,10 +105,6 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Hamibot UI route
-app.get('/hamibot', authenticateToken, (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'hamibot.html'));
-});
 
 // 将数据库连接和服务器启动代码封装为函数
 const startServer = async () => {
