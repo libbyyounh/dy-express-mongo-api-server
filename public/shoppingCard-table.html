@@ -57,6 +57,24 @@
             background-color: #f8f9fa;
             font-weight: bold;
         }
+        th:nth-child(3) {
+            width: 20%;
+        }
+        th:nth-child(4) {
+            width: 30%;
+        }
+        th:nth-child(5) {
+            width: 30%;
+        }
+        th:nth-child(6) {
+            width: 10%;
+        }
+        th:nth-child(7) {
+            width: 10%;
+        }
+        th:nth-child(8) {
+            width: 10%;
+        }
         tr:hover {
             background-color: #f8f9fa;
         }
@@ -170,7 +188,6 @@
         <div class="table-container" id="tableContainer"></div>
     </div>
 
-    <script src="/js/url-table.js"></script> <!-- 复用部分函数 -->
     <script src="/js/float-nav.js"></script>
     <script>
         // 初始化浮动导航，当前页面为shoppingCard-table
@@ -507,6 +524,7 @@
             const headerMap = {
                 id: 'ID',
                 url: 'URL地址',
+                title: '标题',
                 remark: '备注信息',
                 createTime: '创建时间',
                 disabled: '禁用状态'

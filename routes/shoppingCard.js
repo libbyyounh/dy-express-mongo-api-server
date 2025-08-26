@@ -16,6 +16,10 @@ const createShoppingCardModel = (mobile) => {
             type: String,
             default: ''
         },
+        title: {
+            type: String,
+            default: ''
+        },
         disabled: {
             type: Boolean,
             default: false
@@ -68,7 +72,7 @@ const createShoppingCardModel = (mobile) => {
  */
 router.post('/shoppingCard/add', async (req, res) => {
     try {
-        const { mobile, url, remark = '' } = req.body;
+        const { mobile, url, remark = '', title = '' } = req.body;
 
         if (!mobile || !url) {
             return res.status(400).json({ message: '手机号和URL为必填项' });
@@ -93,7 +97,8 @@ router.post('/shoppingCard/add', async (req, res) => {
         // 创建新条目
         const newItem = new ShoppingCardModel({
             url,
-            remark
+            remark,
+            title
         });
 
         await newItem.save();
@@ -160,7 +165,7 @@ router.get('/shoppingCard/getByMobile', async (req, res) => {
         const items = await ShoppingCardModel.find();
 
         res.json({
-            headers: ['id', 'url', 'remark', 'createTime', 'disabled'],
+            headers: ['id', 'url', 'title', 'remark', 'createTime', 'disabled'],
             rows: items
         });
     } catch (error) {

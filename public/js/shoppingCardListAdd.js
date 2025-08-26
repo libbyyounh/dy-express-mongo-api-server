@@ -61,6 +61,48 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3000);
     }
 
+    function extractInfo(str) {
+        // 匹配以https开头的URL
+        const urlRegex = /https:\/\/[^\s]+/;
+        const urlMatch = str.match(urlRegex);
+        const url = urlMatch ? urlMatch[0] : null;
+        
+        // 如果找到了URL，提取URL后面的标题（直到【截止于：长按复制此条消息】为止）
+        let title = null;
+        if (url) {
+            // 从URL后面开始提取
+            const urlIndex = str.indexOf(url) + url.length;
+            const remainingStr = str.substring(urlIndex).trim();
+            
+            // 找到标题结束的位置
+            const endMarker = '长按复制此条消息';
+            const endIndex = remainingStr.indexOf(endMarker);
+            
+            if (endIndex !== -1) {
+                title = remainingStr.substring(0, endIndex).trim();
+            } else {
+                // 如果没有找到结束标记，就取剩余的所有内容
+                title = remainingStr;
+            }
+            
+            // 去除标题前后可能存在的特殊符号（如【】）
+            title = title.trim();
+        }
+        
+        return {
+            url: url,
+            title: title
+        };
+    }
+
+    document.getElementById('url').addEventListener('input', (e) => {
+        const url = e.target.value.trim();
+        if (url) {
+            const info = extractInfo(url);
+            document.getElementById('title').value = info.title;
+        }
+    });
+
     // 提交表单
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -68,6 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const mobile = mobileSelect.value.trim();
         const url = document.getElementById('url').value.trim();
         const remark = document.getElementById('remark').value.trim() || '';
+        const title = document.getElementById('title').value.trim() || '';
 
         if (!mobile || !url) {
             showError('手机号和URL地址为必填项');
@@ -84,7 +127,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({
                     mobile,
                     url,
-                    remark
+                    remark,
+                    title
                 })
             });
 
