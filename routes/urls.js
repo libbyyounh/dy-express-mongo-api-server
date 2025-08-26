@@ -52,6 +52,7 @@ const { createUrlModel, getTodayCollectionName, getTomorrowCollectionName, creat
  *       500:
  *         description: Server error
  */
+// 找到/postUrl接口的实现部分，确保以下代码正确处理mobile参数
 router.post('/postUrl', async (req, res) => {
   try {
     const { url, type = 'A', mobile, remark = '' } = req.body; // 获取mobile和remark参数
@@ -160,7 +161,7 @@ router.post('/postUrl', async (req, res) => {
     // 确定要使用的手机号
     let selectedMobile;
     if (mobile) {
-      selectedMobile = mobile;
+      selectedMobile = mobile; // 如果提供了mobile，直接使用
     } else {
       // 每urlsPerMobile个条目轮换一次
       const mobileIndex = Math.floor(count / urlsPerMobile) % mobiles.length;
@@ -172,7 +173,7 @@ router.post('/postUrl', async (req, res) => {
       url,
       mobile: selectedMobile,
       type,
-      remark, // 添加remark字段
+      remark,
       createTime: moment().format('YYYY-MM-DD HH:mm:ss')
     });
 

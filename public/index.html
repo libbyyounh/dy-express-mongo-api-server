@@ -10,6 +10,23 @@
 <body>
     <div class="container">
         <h1>URL收集工具</h1>
+        <!-- 添加通过手机号新增的选项 -->
+        <div class="form-group" style="margin: 1rem 0;">
+            <label>通过手机号新增：</label>
+            <div style="display: flex;gap: 30px;">
+                <label style="margin-right: 1rem;"><input type="radio" name="isByMobile" value="0" checked> 否</label>
+                <label><input type="radio" name="isByMobile" value="1"> 是</label>
+            </div>
+        </div>
+        
+        <!-- 手机号下拉选择框 -->
+        <div class="form-group" id="mobileGroup" style="margin: 1rem 0; display: none;">
+            <label for="mobileSelect">手机号：</label>
+            <select id="mobileSelect" style="width: 200px; padding: 0.5rem;">
+                <option value="">请选择手机号</option>
+                <!-- 选项将通过JavaScript动态加载 -->
+            </select>
+        </div>
         <div class="url-input-section">
             <input type="text" id="urlInput" placeholder="请输入URL..." autocomplete="off">
             <button id="pasteBtn" class="btn secondary">粘贴</button>
