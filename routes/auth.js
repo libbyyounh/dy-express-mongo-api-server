@@ -3,6 +3,7 @@ const router = express.Router();
 const User = require('../models/User');
 const { generateToken } = require('../middleware/auth');
 const moment = require('moment');
+const crypto = require('crypto');
 
 /**
  * @swagger
@@ -133,5 +134,59 @@ const handleLogin = async (req, res) => {
 // 保留一个接口，删除重复定义
 router.post('/login', handleLogin);
 router.post('/getToken', handleLogin); // 或直接删除此路由
+
+// 在文件底部添加新接口
+/**
+ * @swagger
+ * /api/generateAPIToken:
+ *   get:
+ *     summary: Generate API token for API role user
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: API token generated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 token: 
+ *                   type: string
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Server error
+ */
+router.get('/generateAPIToken', async (req, res) => {
+  try {
+    // 检查是否已有role=API的用户
+    let apiUser = await User.findOne({ role: 'API', username: 'API' });
+    
+    if (!apiUser) {
+      // 创建随机密码
+      const randomPassword = crypto.randomBytes(16).toString('hex');
+      
+      // 创建API用户
+      apiUser = new User({
+        username: 'API',
+        password: randomPassword,
+        role: 'API'
+      });
+      
+      await apiUser.save();
+      console.log('Created API user with random password');
+    }
+    
+    // 生成token
+    const token = generateToken(apiUser);
+    
+    res.json({ token, expiresIn: process.env.JWT_EXPIRES_IN });
+  } catch (error) {
+    console.error('Generate API token error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
 module.exports = router;

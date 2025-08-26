@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生成API Token - URL收集工具</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/float-nav.css">
+    <style>
+      textarea {
+        width: 100%;
+      }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>生成API Token</h1>
+        
+        <div class="form-group" style="margin: 2rem 0;">
+            <label for="token">API Token：</label>
+            <textarea id="token" name="token" readonly rows="5" cols="80" placeholder="点击生成按钮获取API Token"></textarea>
+        </div>
+        
+        <div class="button-group" style="margin: 1rem 0;display: flex; flex-direction: column;gap: 10px;">
+            <button id="generateBtn" class="btn primary">生成Token</button>
+            <button id="copyBtn" class="btn secondary">复制到剪贴板</button>
+        </div>
+        
+        <div id="message" class="message" style="margin: 1rem 0;"></div>
+    </div>
+    
+    <script src="/js/generateAPIToken.js"></script>
+    <script src="/js/float-nav.js"></script>
+    <script>
+        // 初始化浮动导航，当前页面为generateAPIToken
+        initFloatNav('generateAPIToken');
+    </script>
+</body>
+</html>
