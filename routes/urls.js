@@ -167,6 +167,7 @@ router.post('/postUrl', async (req, res) => {
       const mobileIndex = Math.floor(count / urlsPerMobile) % mobiles.length;
       selectedMobile = mobiles[mobileIndex].mobile;
     }
+    const mobileCount = await UrlModel.countDocuments({ type, mobile: selectedMobile });
 
     // 创建新URL条目，包含type和remark
     const newUrl = new UrlModel({
@@ -180,7 +181,7 @@ router.post('/postUrl', async (req, res) => {
     await newUrl.save();
 
     res.status(201).json({
-      message: `URL added successfully, collection: ${collectionName}, count: ${count + 1}`,
+      message: `URL added successfully, collection: ${collectionName}, totalCount: ${count + 1}. Mobile: ${selectedMobile}, mobileCount: ${mobileCount + 1}`,
       data: newUrl
     });
   } catch (error) {
