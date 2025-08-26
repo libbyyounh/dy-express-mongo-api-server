@@ -10,6 +10,12 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
+    // 显示当前手机号
+    const mobileSpan = document.getElementById('mobileSpan');
+    mobileSpan.textContent = getUrlParams().mobile;
+    // 获取信息
+    getInfo();
+
     // 获取URL参数
     function getUrlParams() {
         const params = {};
@@ -19,6 +25,32 @@ document.addEventListener('DOMContentLoaded', () => {
             params.id = pathParts.at(-1);
         }
         return params;
+    }
+
+    async function getInfo () {
+        const { mobile, id } = getUrlParams();
+        if (id && mobile) {
+            try {
+                const response = await fetch(`/api/shoppingCard/getByMobile?mobile=${mobile}&id=${id}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || '获取信息失败');
+                }
+
+                // 填充信息
+                document.getElementById('titleSpan').textContent = data.title;
+            } catch (error) {
+                alert('获取信息失败: ' + error.message);
+            }
+        }
     }
 
     // 粘贴按钮功能

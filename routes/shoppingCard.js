@@ -3,6 +3,10 @@ const mongoose = require('mongoose');
 const router = express.Router();
 const moment = require('moment');
 const Mobile = require('../models/Mobile');
+const NodeCache = require('node-cache');
+
+// 初始化缓存，设置过期时间为30秒
+const cache = new NodeCache({ stdTTL: 30 });
 
 // 创建购物卡集合模型的函数
 const createShoppingCardModel = (mobile) => {
@@ -140,7 +144,7 @@ router.post('/shoppingCard/add', async (req, res) => {
  */
 router.get('/shoppingCard/getByMobile', async (req, res) => {
     try {
-        const { mobile } = req.query;
+        const { mobile, id } = req.query;
 
         if (!mobile) {
             return res.status(400).json({ message: '手机号为必填项' });
@@ -162,6 +166,22 @@ router.get('/shoppingCard/getByMobile', async (req, res) => {
 
         // 获取数据
         const ShoppingCardModel = createShoppingCardModel(mobile);
+
+        if (id) {
+            const cacheKey = `item_${mobile}_${id}`;
+            // 从缓存中获取
+            const cachedItem = cache.get(cacheKey);
+            if (cachedItem) {
+                return res.json(cachedItem);
+            } 
+            // 从数据库中获取
+            const item = await ShoppingCardModel.findById(id);
+            if (!item) {
+                return res.status(404).json({ message: '未找到该ID对应的购物卡' });
+            }
+            return res.json(item);
+        }
+
         const items = await ShoppingCardModel.find();
 
         res.json({

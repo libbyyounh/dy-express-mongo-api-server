@@ -6,10 +6,29 @@
     <title>shopping card 收集工具 - 首页</title>
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/float-nav.css">
+    <style>
+        .form-group {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .form-group label {
+            margin: 0;
+            flex-shrink: 0;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <h1>shopping card 收集工具</h1>
+        <div class="form-group">
+            <label for="mobileSpan">手机号码</label>
+            <span id="mobileSpan"></span>
+        </div>
+        <div class="form-group">
+            <label for="titleSpan">标题</label>
+            <span id="titleSpan"></span>
+        </div>
         <div class="url-input-section">
             <input type="text" id="urlInput" placeholder="请输入URL..." autocomplete="off">
             <button id="pasteBtn" class="btn secondary">粘贴</button>
