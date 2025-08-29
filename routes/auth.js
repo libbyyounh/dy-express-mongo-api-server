@@ -4,7 +4,7 @@ const User = require('../models/User');
 const { generateToken } = require('../middleware/auth');
 const moment = require('moment');
 const crypto = require('crypto');
-const authenticateToken = require('../middleware/apiAuth');
+const { authenticateToken } = require('../middleware/auth');
 
 /**
  * @swagger
