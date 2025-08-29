@@ -3,12 +3,18 @@ const User = require('../models/User');
 // API Secret 认证中间件
 const authenticateApiKeySecret = async (req, res, next) => {
   try {
+    // 添加详细的请求信息日志
+    console.log('API Auth Middleware triggered for:', req.method, req.path);
+    
     // 从请求头中获取 API Key 和 Secret
     const apiKey = req.headers['x-api-key'];
     const apiSecret = req.headers['x-api-secret'];
     
+    console.log('API Key provided:', !!apiKey, 'API Secret provided:', !!apiSecret);
+    
     // 如果没有提供 API Key 或 Secret，继续使用其他认证方式
     if (!apiKey || !apiSecret) {
+      console.log('No API Key or Secret provided, continuing with other auth methods');
       return next();
     }
     
@@ -71,6 +77,7 @@ const authenticateApiKeySecret = async (req, res, next) => {
     req.user = user;
     next();
   } catch (error) {
+    console.error('Error in API auth middleware:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };

@@ -21,6 +21,12 @@ const generateShortToken = (user) => {
 // Authenticate JWT token middleware
 const authenticateToken = async (req, res, next) => {
   try {
+    // 如果用户已经通过其他方式（如API Key）认证，直接跳过Token验证
+    if (req.user) {
+      console.log('User already authenticated via other method, skipping token validation');
+      return next();
+    }
+    
     // Get token from header
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
