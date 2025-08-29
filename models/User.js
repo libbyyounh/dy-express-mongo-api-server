@@ -22,6 +22,10 @@ const userSchema = new mongoose.Schema({
   tokenVersion: {
     type: Number,
     default: 0
+  },
+  disabled: {
+    type: Boolean,
+    default: false
   }
 }, {
   timestamps: true

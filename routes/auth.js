@@ -113,7 +113,16 @@ const handleLogin = async (req, res) => {
   try {
     const { username, password } = req.body;
     const user = await User.findOne({ username });
-    if (!user || !(await user.comparePassword(password))) {
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid username or password' });
+    }
+
+    // Check if user is disabled
+    if (user.disabled) {
+      return res.status(401).json({ message: 'Account is disabled.' });
+    }
+
+    if (!(await user.comparePassword(password))) {
       return res.status(401).json({ message: 'Invalid username or password' });
     }
     

@@ -38,6 +38,11 @@ const authenticateToken = async (req, res, next) => {
       return res.status(401).json({ message: 'Invalid token. User not found.' });
     }
 
+    // Check if user is disabled
+    if (user.disabled) {
+      return res.status(401).json({ message: 'Account is disabled.' });
+    }
+
     // Attach user to request object
     req.user = user;
     next();
