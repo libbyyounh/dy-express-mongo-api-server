@@ -4,6 +4,7 @@ const User = require('../models/User');
 const { generateToken } = require('../middleware/auth');
 const moment = require('moment');
 const crypto = require('crypto');
+const authenticateToken = require('../middleware/apiAuth');
 
 /**
  * @swagger
@@ -168,7 +169,7 @@ router.post('/getToken', handleLogin); // 或直接删除此路由
  *       500:
  *         description: Server error
  */
-router.get('/generateAPIToken', async (req, res) => {
+router.get('/generateAPIToken', authenticateToken, async (req, res) => {
   try {
     // 检查是否已有role=API的用户
     let apiUser = await User.findOne({ role: 'API', username: 'API' });
@@ -194,6 +195,60 @@ router.get('/generateAPIToken', async (req, res) => {
     res.json({ token, expiresIn: process.env.JWT_EXPIRES_IN });
   } catch (error) {
     console.error('Generate API token error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+/**
+ * @swagger
+ * /api/generate-api-credentials:
+ *   post:
+ *     summary: Generate API credentials (key and secret)
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: API credentials generated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 apiKey:
+ *                   type: string
+ *                 apiSecret:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Server error
+ */
+router.post('/generate-api-credentials', authenticateToken, async (req, res) => {
+  try {
+    // 获取当前用户
+    const user = await User.findById(req.user._id);
+    
+    // 检查用户是否为管理员
+    if (user.role === 'admin') {
+      return res.status(403).json({ message: 'Admin users cannot generate API credentials' });
+    }
+    
+    // 生成 API 凭证
+    const { apiKey, apiSecret } = user.generateApiCredentials();
+    
+    // 保存用户文档
+    await user.save();
+    
+    res.json({
+      apiKey,
+      apiSecret,
+      message: 'API credentials generated successfully. Please save the secret as it will not be shown again.'
+    });
+  } catch (error) {
+    console.error('Generate API credentials error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });

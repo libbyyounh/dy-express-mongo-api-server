@@ -15,6 +15,7 @@ const mobilesRoutes = require('./routes/mobiles');
 const { router: hamibotRoutes } = require('./routes/hamibot');
 const shoppingCardRoutes = require('./routes/shoppingCard'); // 新增
 const usersRouter = require('./routes/users');
+const authenticateApiKeySecret = require('./middleware/apiAuth');
 
 // Initialize Express app
 const app = express();
@@ -89,10 +90,10 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 // Routes
 // 修改API路由注册，添加认证和角色检查中间件
 app.use('/api', authRoutes);
-app.use('/api', authenticateToken, apiRoleCheck, urlsRoutes);
-app.use('/api', authenticateToken, apiRoleCheck, mobilesRoutes);
-app.use('/api', authenticateToken, apiRoleCheck, hamibotRoutes);
-app.use('/api', authenticateToken, apiRoleCheck, shoppingCardRoutes);
+app.use('/api', authenticateApiKeySecret, authenticateToken, apiRoleCheck, urlsRoutes);
+app.use('/api', authenticateApiKeySecret, authenticateToken, apiRoleCheck, mobilesRoutes);
+app.use('/api', authenticateApiKeySecret, authenticateToken, apiRoleCheck, hamibotRoutes);
+app.use('/api', authenticateApiKeySecret, authenticateToken, apiRoleCheck, shoppingCardRoutes);
 
 // 用户路由已经有authenticateToken中间件，添加apiRoleCheck
 app.use('/api/users', authenticateToken, apiRoleCheck, usersRouter);
