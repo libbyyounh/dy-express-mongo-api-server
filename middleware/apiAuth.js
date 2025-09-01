@@ -72,6 +72,27 @@ const authenticateApiKeySecret = async (req, res, next) => {
     if (!user.verifyApiSecret(apiSecret)) {
       return res.status(401).json({ message: 'Invalid API Secret' });
     }
+
+    // 白名单URL数组
+    const whitelistUrls = [
+      '/api/getAllUrl',
+      '/api/updateUsed'
+      // 可以根据需要添加更多白名单URL
+    ];
+    
+    // 获取当前请求的URL路径
+    const requestUrl = req.originalUrl;
+    
+    // 检查URL是否在白名单中
+    const isAllowed = whitelistUrls.some(whitelistUrl => 
+      requestUrl.startsWith(whitelistUrl)
+    );
+    
+    if (!isAllowed) {
+      return res.status(403).json({
+        message: '访问被拒绝。只有白名单中的接口允许访问。' 
+      });
+    }
     
     // 将用户信息附加到请求对象
     req.user = user;
