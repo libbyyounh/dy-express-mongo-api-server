@@ -74,7 +74,7 @@ const createShoppingCardModel = (mobile) => {
  *       500:
  *         description: Server error
  */
-router.post('/shoppingCard/add', async (req, res) => {
+router.post('/add', async (req, res) => {
     try {
         const { mobile, url, remark = '', title = '' } = req.body;
 
@@ -142,7 +142,7 @@ router.post('/shoppingCard/add', async (req, res) => {
  *       500:
  *         description: Server error
  */
-router.get('/shoppingCard/getByMobile', async (req, res) => {
+router.get('/getByMobile', async (req, res) => {
     try {
         const { mobile, id } = req.query;
 
@@ -226,7 +226,7 @@ router.get('/shoppingCard/getByMobile', async (req, res) => {
  *       500:
  *         description: Server error
  */
-router.post('/shoppingCard/delete', async (req, res) => {
+router.post('/delete', async (req, res) => {
     try {
         const { mobile, ids } = req.body;
 
@@ -297,7 +297,7 @@ router.post('/shoppingCard/delete', async (req, res) => {
  *       500:
  *         description: Server error
  */
-router.post('/shoppingCard/updateDisabled', async (req, res) => {
+router.post('/updateDisabled', async (req, res) => {
     try {
         const { mobile, ids, disabled } = req.body;
 

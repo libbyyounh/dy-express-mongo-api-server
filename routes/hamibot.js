@@ -307,7 +307,7 @@ const processTaskQueue = async () => {
 startTaskPolling();
 
 // Execute Hamibot script
-router.post('/hamibot/execute', authenticateToken, async (req, res) => {
+router.post('/execute', authenticateToken, async (req, res) => {
   try {
     const { mobile, speed, delay } = req.body;
     const collectionName = getTodayCollectionName();
@@ -370,7 +370,7 @@ router.post('/hamibot/execute', authenticateToken, async (req, res) => {
 });
 
 // Stop all tasks
-router.post('/hamibot/stop', authenticateToken, async (req, res) => {
+router.post('/stop', authenticateToken, async (req, res) => {
   try {
     const { mobile } = req.body;
 
@@ -421,7 +421,7 @@ router.post('/hamibot/stop', authenticateToken, async (req, res) => {
 });
 
 // Get execution logs
-router.get('/hamibot/log', authenticateToken, async (req, res) => {
+router.get('/log', authenticateToken, async (req, res) => {
   try {
     const { mobile, status } = req.query;
     const query = {};

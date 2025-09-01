@@ -26,7 +26,7 @@ const cache = new NodeCache({ stdTTL: 300 });
  *       500:
  *         description: Server error
  */
-router.get('/mobiles', async (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const { type } = req.query;
     
@@ -81,7 +81,7 @@ router.get('/mobiles', async (req, res) => {
  *       500:
  *         description: Server error
  */
-router.post('/mobiles', async (req, res) => {
+router.post('/', async (req, res) => {
   try {
     const { mobile, disabled = false } = req.body;
     
@@ -148,7 +148,7 @@ router.post('/mobiles', async (req, res) => {
  *       500:
  *         description: Server error
  */
-router.put('/mobiles/:id', async (req, res) => {
+router.put('/:id', async (req, res) => {
   try {
     const { mobile, disabled } = req.body;
     const { id } = req.params;

@@ -89,10 +89,10 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // Routes
 // 修改API路由注册，添加认证和角色检查中间件
-app.use('/api', authenticateApiKeySecret, authenticateToken, apiRoleCheck, urlsRoutes);
-app.use('/api', authenticateApiKeySecret, authenticateToken, apiRoleCheck, mobilesRoutes);
-app.use('/api', authenticateApiKeySecret, authenticateToken, apiRoleCheck, hamibotRoutes);
-app.use('/api', authenticateApiKeySecret, authenticateToken, apiRoleCheck, shoppingCardRoutes);
+app.use('/api/urls', authenticateApiKeySecret, authenticateToken, apiRoleCheck, urlsRoutes);
+app.use('/api/mobiles', authenticateApiKeySecret, authenticateToken, apiRoleCheck, mobilesRoutes);
+app.use('/api/hamibot', authenticateApiKeySecret, authenticateToken, apiRoleCheck, hamibotRoutes);
+app.use('/api/shoppingCard', authenticateApiKeySecret, authenticateToken, apiRoleCheck, shoppingCardRoutes);
 app.use('/api/users', authenticateToken, apiRoleCheck, usersRouter);
 
 // 然后再注册authRoutes

@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                const response = await fetch('/api/postUrl', {
+                const response = await fetch('/api/urls/postUrl', { // 添加/urls前缀
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

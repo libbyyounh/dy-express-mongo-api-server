@@ -34,7 +34,7 @@ async function fetchTableData() {
         }
 
         // 调用API
-        const response = await fetch(`/api/table?date=${formattedDate}`, {
+        const response = await fetch(`/api/urls/table?date=${formattedDate}`, { // 添加/urls前缀
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -188,7 +188,7 @@ async function batchDelete() {
     const token = localStorage.getItem('token');
 
     try {
-        const response = await fetch('/api/batch/delete', {
+        const response = await fetch('/api/urls/batch/delete', { // 添加/urls前缀
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -229,7 +229,7 @@ async function batchSwitchUsed(isUsed = false) {
     const token = localStorage.getItem('token');
 
     try {
-        const response = await fetch('/api/batch/update-used', {
+        const response = await fetch('/api/urls/batch/update-used', { // 添加/urls前缀
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,

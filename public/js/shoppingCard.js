@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (mobile) requestBody.mobile = mobile;
             if (id) requestBody.remark = id;
 
-            const response = await fetch('/api/postUrl', {
+            const response = await fetch('/api/urls/postUrl', { // 添加/urls前缀
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
