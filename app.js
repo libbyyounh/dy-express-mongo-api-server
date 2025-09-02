@@ -12,7 +12,7 @@ const { initializeDatabase, createDailyCollection, cleanupOldCollections } = req
 const authRoutes = require('./routes/auth');
 const urlsRoutes = require('./routes/urls');
 const mobilesRoutes = require('./routes/mobiles');
-const { router: hamibotRoutes } = require('./routes/hamibot');
+// const { router: hamibotRoutes } = require('./routes/hamibot');
 const shoppingCardRoutes = require('./routes/shoppingCard'); // 新增
 const usersRouter = require('./routes/users');
 const authenticateApiKeySecret = require('./middleware/apiAuth');
@@ -91,7 +91,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 // 修改API路由注册，添加认证和角色检查中间件
 app.use('/api/urls', authenticateApiKeySecret, authenticateToken, apiRoleCheck, urlsRoutes);
 app.use('/api/mobiles', authenticateApiKeySecret, authenticateToken, apiRoleCheck, mobilesRoutes);
-app.use('/api/hamibot', authenticateApiKeySecret, authenticateToken, apiRoleCheck, hamibotRoutes);
+// app.use('/api/hamibot', authenticateApiKeySecret, authenticateToken, apiRoleCheck, hamibotRoutes);
 app.use('/api/shoppingCard', authenticateApiKeySecret, authenticateToken, apiRoleCheck, shoppingCardRoutes);
 app.use('/api/users', authenticateToken, apiRoleCheck, usersRouter);
 

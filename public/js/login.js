@@ -35,6 +35,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok) {
                 // 存储token并跳转到首页
                 localStorage.setItem('token', data.token);
+                // 存储用户信息
+                localStorage.setItem('userInfo', JSON.stringify(data.userInfo));
                 window.location.href = '/';
             } else {
                 errorMessage.textContent = data.message || '登录失败，请检查账号密码';

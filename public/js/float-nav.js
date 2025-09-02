@@ -16,7 +16,7 @@ function initFloatNav(currentPage) {
                     <span>加车</span>
                     <span class="float-nav-label">加车</span>
                 </a>
-                <a href="/hamibot.html" class="float-nav-item" ${currentPage === 'hamibot' ? 'style="display:none"' : ''}>
+                <a href="/hamibot.html" class="float-nav-item" ${currentPage === 'hamibot' ? 'style="display:none"' : 'style="display:none"'}>
                     <span>脚本</span>
                     <span class="float-nav-label">脚本执行</span>
                 </a>
@@ -30,6 +30,9 @@ function initFloatNav(currentPage) {
                 </a>
             </div>
             <button class="float-nav-main-btn">+</button>
+            <div class="float-nav-username">
+                Hello, <span id="float-nav-username"></span>
+            </div>
         </div>
     `;
 
@@ -40,6 +43,18 @@ function initFloatNav(currentPage) {
     const navContainer = document.querySelector('.float-nav-container');
     const mainBtn = document.querySelector('.float-nav-main-btn');
     const menu = document.querySelector('.float-nav-menu');
+    const username = document.querySelector('.float-nav-username');
+    const usernameSpan = document.getElementById('float-nav-username');
+
+
+    function setUsername() {
+        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+        if (userInfo) {
+            usernameSpan.textContent = userInfo.username;
+        }
+    }
+
+    setUsername();
 
     // 初始化位置
     function initPosition() {
@@ -58,6 +73,7 @@ function initFloatNav(currentPage) {
     mainBtn.addEventListener('click', () => {
         mainBtn.classList.toggle('active');
         menu.classList.toggle('active');
+        username.classList.toggle('active');
     });
 
     // 窗口大小改变时重新计算位置

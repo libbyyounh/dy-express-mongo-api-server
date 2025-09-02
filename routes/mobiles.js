@@ -30,8 +30,9 @@ router.get('/', async (req, res) => {
   try {
     const { type } = req.query;
     
-    // 构建缓存键，包含type参数
-    const cacheKey = type ? `mobiles_type_${type}` : 'all_mobiles';
+    // 构建缓存键，包含type参数和userId
+    const currentUserId = req.user._id;
+    const cacheKey = type ? `mobiles_type_${type}_user_${currentUserId}` : `all_mobiles_user_${currentUserId}`;
     const cachedData = cache.get(cacheKey);
 
     if (cachedData) {
@@ -39,7 +40,19 @@ router.get('/', async (req, res) => {
     }
 
     // 根据是否有type参数构建查询条件
-    const query = type ? { type } : {};
+    const query = {};
+    if (type) {
+      query.type = type;
+    }
+    
+    // 添加userId过滤条件：查询创建人ID=123的和创建人ID为空的数据
+    if (req.user.role !== 'admin') {
+      query.$or = [
+        { createByUserId: currentUserId },
+        { createByUserId: '' }
+      ];
+    }
+    
     const mobiles = await Mobile.find(query);
     
     cache.set(cacheKey, mobiles);
@@ -97,7 +110,8 @@ router.post('/', async (req, res) => {
     
     const newMobile = new Mobile({
       mobile,
-      disabled
+      disabled,
+      createByUserId: req.user._id
     });
     
     await newMobile.save();

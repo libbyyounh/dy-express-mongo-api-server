@@ -175,7 +175,8 @@ router.post('/postUrl', async (req, res) => {
       mobile: selectedMobile,
       type,
       remark,
-      createTime: moment().format('YYYY-MM-DD HH:mm:ss')
+      createTime: moment().format('YYYY-MM-DD HH:mm:ss'),
+      createByUserId: req.user._id
     });
 
     await newUrl.save();
@@ -465,12 +466,22 @@ router.get('/table', async (req, res) => {
 
     // Get table data
     const UrlModel = createUrlModel(collectionName);
-    const rows = await UrlModel.find({});
+    const query = {};
+    // 非管理员角色
+    if (req.user.role !== 'admin') {
+      // 修改查询条件，过滤createByUserId等于当前用户ID或为空的记录
+      query.$or = [
+        { createByUserId: req.user._id },
+        { createByUserId: '' }
+      ];
+    }
+    // 获取数据
+    const rows = await UrlModel.find(query);
 
     // Get headers from the first document
     const headers = rows.length > 0 ? Object.keys(rows[0]._doc) : [];
     // Remove _id and __v from headers
-    const filteredHeaders = headers.filter(header => !['_id', '__v'].includes(header));
+    const filteredHeaders = headers.filter(header => !['_id', '__v', 'createByUserId'].includes(header));
 
     res.json({
       headers: filteredHeaders,

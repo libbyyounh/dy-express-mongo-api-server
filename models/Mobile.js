@@ -12,7 +12,12 @@ const mobileSchema = new mongoose.Schema({
   },
   type: {
     type: String,
+    enum: ['A', 'B'],
     default: 'A'
+  },
+  createByUserId: {
+    type: String,
+    default: ''
   }
 }, {
   timestamps: true

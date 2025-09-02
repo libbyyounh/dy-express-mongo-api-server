@@ -83,3 +83,19 @@
 .float-nav-item:hover .float-nav-label {
     opacity: 1;
 }
+.float-nav-username {
+    position: absolute;
+    right: 60px;
+    top: 10px;
+    background-color: rgba(0,0,0,0.7);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+.float-nav-username.active {
+    opacity: 1;
+}

@@ -17,6 +17,7 @@ const createUrlModel = (collectionName) => {
     },
     type: {
       type: String,
+      enum: ['A', 'B'],
       default: 'A'
     },
     isUsed: {
@@ -32,6 +33,10 @@ const createUrlModel = (collectionName) => {
       default: false
     },
     remark: {
+      type: String,
+      default: ''
+    },
+    createByUserId: {
       type: String,
       default: ''
     }

@@ -75,8 +75,8 @@ const authenticateApiKeySecret = async (req, res, next) => {
 
     // 白名单URL数组
     const whitelistUrls = [
-      '/api/getAllUrl',
-      '/api/updateUsed'
+      '/api/urls/getAllUrl',
+      '/api/urls/updateUsed'
       // 可以根据需要添加更多白名单URL
     ];
     

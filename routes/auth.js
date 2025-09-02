@@ -134,7 +134,7 @@ const handleLogin = async (req, res) => {
     );
     
     const token = generateToken(user);
-    res.json({ token, expiresIn: process.env.JWT_EXPIRES_IN });
+    res.json({ token, expiresIn: process.env.JWT_EXPIRES_IN, userInfo: { username: user.username, role: user.role, userId: user._id } });
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ message: 'Server error' });
