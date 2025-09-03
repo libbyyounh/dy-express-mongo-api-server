@@ -642,6 +642,82 @@ router.post('/batch/update-used', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+
+/**
+ * @swagger
+ * /api/batch/disabled:
+ *   post:
+ *     summary: Batch update disabled status
+ *     tags: [URLs]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - date
+ *               - ids
+ *             properties:
+ *               date:
+ *                 type: string
+ *                 format: YYYYMMDD
+ *                 description: Date of collection
+ *               ids:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Array of URL IDs to update
+ *               disabled:
+ *                 type: boolean
+ *                 default: true
+ *                 description: "New value for disabled status (default: true)"
+ *     responses:
+ *       200:
+ *         description: URLs updated successfully
+ *       400:
+ *         description: Invalid input
+ *       404:
+ *         description: Collection not found
+ *       500:
+ *         description: Server error
+ **/
+router.post('/batch/disabled', async (req, res) => {
+  try {
+    const { date, ids, disabled } = req.body;
+    // Validate input
+    if (!date || !/^\d{8}$/.test(date)) {
+      return res.status(400).json({ message: 'Valid date (YYYYMMDD) is required' });
+    }
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ message: 'Array of IDs is required' });
+    }
+    if (typeof disabled !== 'boolean') {
+      return res.status(400).json({ message: 'Disabled status must be a boolean' });
+    }
+    // Check if collection exists
+    const collectionName = date;
+    const collections = await mongoose.connection.db.listCollections({ name: collectionName }).toArray();
+    if (collections.length === 0) {
+      return res.status(404).json({ message: `Collection for date ${date} not found` });
+    }
+    // Update documents
+    const UrlModel = createUrlModel(collectionName);
+    const result = await UrlModel.updateMany(
+      { _id: { $in: ids } },
+      { $set: { disabled } }
+    );
+    res.json({
+      message: `${result.modifiedCount} URLs updated successfully`,
+      modifiedCount: result.modifiedCount
+    });
+  } catch (error) {
+    console.error('Error batch updating URLs:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 // 全局API限流 - 100并发/分钟
 const apiLimiter = rateLimit({
   windowMs: 60 * 1000, // 1分钟

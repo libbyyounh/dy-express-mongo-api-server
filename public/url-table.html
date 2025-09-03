@@ -155,8 +155,10 @@
         <!-- 将操作按钮移到表格容器外 -->
         <div class="table-actions" style="margin-bottom: 1rem; display: none;" id="tableActions">
             <button id="multipleDel" disabled class="btn-delete" onclick="batchDelete()">批量删除</button>
-            <button id="multipleSwitch" disabled class="btn-switch" onclick="batchSwitchUsed(false)">批量设置未使用</button>
-            <button id="multipleSetUsed" disabled class="btn-switch" style="background-color: #ffc107;" onclick="batchSwitchUsed(true)">批量设置已使用</button>
+            <button id="multipleSwitch" disabled class="btn-switch" onclick="batchSwitchUsed(false)">批量未使用</button>
+            <button id="multipleSetUsed" disabled class="btn-switch" style="background-color: #ffc107;" onclick="batchSwitchUsed(true)">批量已使用</button>
+            <button id="multipleDisabled" disabled class="btn-switch" style="background-color: #dc3545;" onclick="batchToggleDisabled(true)">批量禁用</button>
+            <button id="multipleEnabled" disabled class="btn-switch" style="background-color: #28a745;" onclick="batchToggleDisabled(false)">批量启用</button>
         </div>
         
         <div class="table-container" id="tableContainer"></div>

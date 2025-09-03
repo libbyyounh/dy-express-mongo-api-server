@@ -163,10 +163,14 @@ function updateActionButtons() {
     const multipleDel = document.getElementById('multipleDel');
     const multipleSwitch = document.getElementById('multipleSwitch');
     const multipleSetUsed = document.getElementById('multipleSetUsed');
+    const multipleDisabled = document.getElementById('multipleDisabled');
+    const multipleEnabled = document.getElementById('multipleEnabled');
 
     multipleDel.disabled = checkedCount === 0;
     multipleSwitch.disabled = checkedCount === 0;
     multipleSetUsed.disabled = checkedCount === 0;
+    multipleDisabled.disabled = checkedCount === 0;
+    multipleEnabled.disabled = checkedCount === 0;
 }
 
 // 批量删除功能
@@ -257,6 +261,42 @@ async function batchSwitchUsed(isUsed = false) {
     }
 }
 
+async function batchToggleDisabled(disabled = true) {
+    const checkedIds = Array.from(document.querySelectorAll('.row-checkbox:checked'))
+        .map(checkbox => checkbox.dataset.id);
+
+    const dateInput = document.getElementById('datePicker');
+    const formattedDate = dateInput.value.replace(/-/g, '');
+    const token = localStorage.getItem('token');
+
+    try {
+        const response = await fetch('/api/urls/batch/disabled', { // 添加/urls前缀
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                date: formattedDate,
+                ids: checkedIds,
+                disabled: disabled
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || '批量更新失败');
+        }
+
+        const statusText = disabled ? '已禁用' : '未禁用';
+        showError(`成功更新${data.modifiedCount}条数据的禁用状态为${statusText}`, 'success');
+        // 重新加载数据
+        fetchTableData();
+    } catch (error) {
+        showError(error.message);
+    }
+}
 // 更新错误提示函数，支持成功消息
 // 删除重复的 showError 函数定义
 // 保留带 type 参数的版本，删除无参数版本
