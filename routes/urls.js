@@ -683,7 +683,7 @@ router.post('/batch/update-used', async (req, res) => {
  *         description: Collection not found
  *       500:
  *         description: Server error
- **/
+ */
 router.post('/batch/disabled', async (req, res) => {
   try {
     const { date, ids, disabled } = req.body;
