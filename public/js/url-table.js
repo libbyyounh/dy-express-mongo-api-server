@@ -165,12 +165,14 @@ function updateActionButtons() {
     const multipleSetUsed = document.getElementById('multipleSetUsed');
     const multipleDisabled = document.getElementById('multipleDisabled');
     const multipleEnabled = document.getElementById('multipleEnabled');
+    const multipleTransfer = document.getElementById('multipleTransfer');
 
     multipleDel.disabled = checkedCount === 0;
     multipleSwitch.disabled = checkedCount === 0;
     multipleSetUsed.disabled = checkedCount === 0;
     multipleDisabled.disabled = checkedCount === 0;
     multipleEnabled.disabled = checkedCount === 0;
+    multipleTransfer.disabled = checkedCount === 0;
 }
 
 // 批量删除功能
@@ -333,4 +335,55 @@ function formatHeaderName(header) {
         disabled: '禁用状态'
     };
     return headerMap[header] || header;
+}
+
+// 批量迁移集合功能
+async function batchTransfer() {
+    const checkedIds = Array.from(document.querySelectorAll('.row-checkbox:checked'))
+        .map(checkbox => checkbox.dataset.id);
+
+    if (checkedIds.length === 0) {
+        showError('请选择要迁移的数据');
+        return;
+    }
+    const dateInput = document.getElementById('datePicker');
+    // 让用户选择目标日期
+    const transferDate = dateInput.value.replace(/-/g, '');
+    if (!transferDate || !/^\d{8}$/.test(transferDate)) {
+        showError('无效的日期格式，请使用YYYYMMDD格式');
+        return;
+    }
+
+    // 确认操作
+    if (!confirm(`确定要将选中的${checkedIds.length}条数据迁移到明天的集合吗？`)) {
+        return;
+    }
+
+    const token = localStorage.getItem('token');
+
+    try {
+        const response = await fetch('/api/urls/transfer', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                ids: checkedIds,
+                targetDate: transferDate
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || '批量迁移失败');
+        }
+
+        showError(`成功迁移${data.transferredCount}条数据到明天的集合`, 'success');
+        // 重新加载数据
+        fetchTableData();
+    } catch (error) {
+        showError(error.message);
+    }
 }

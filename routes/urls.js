@@ -718,13 +718,138 @@ router.post('/batch/disabled', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+/**
+ * @swagger
+ * /api/urls/transfer:
+ *   post:
+ *     summary: Transfer URLs to another collection
+ *     tags: [URLs]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - ids
+ *               - targetDate
+ *             properties:
+ *               ids:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Array of URL IDs to transfer
+ *               targetDate:
+ *                 type: string
+ *                 format: YYYYMMDD
+ *                 description: Target collection date
+ *     responses:
+ *       200:
+ *         description: URLs transferred successfully
+ *       400:
+ *         description: Invalid input
+ *       404:
+ *         description: Collection not found
+ *       500:
+ *         description: Server error
+ */
+router.post('/transfer', async (req, res) => {
+  try {
+    const { ids, targetDate } = req.body;
+
+    // Validate input
+    if (!targetDate || !/^\d{8}$/.test(targetDate)) {
+      return res.status(400).json({ message: 'Valid target date (YYYYMMDD) is required' });
+    }
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ message: 'Array of IDs is required' });
+    }
+
+    const currentCollectionName = targetDate;
+    const nextDate = moment(targetDate).add(1, 'day').format('YYYYMMDD');
+    // Check if target collection exists, create if not
+    const nextCollections = await mongoose.connection.db.listCollections({ name: nextDate }).toArray();
+    if (nextCollections.length === 0) {
+      // Create target collection
+      createUrlModel(nextDate);
+      console.log(`Created new collection: ${nextDate}`);
+    }
+
+    // Get source and target models
+    const SourceUrlModel = createUrlModel(currentCollectionName);
+    const TargetUrlModel = createUrlModel(nextDate);
+
+    // Find all URLs to transfer
+    const urlsToTransfer = await SourceUrlModel.find({ _id: { $in: ids } });
+    
+    if (urlsToTransfer.length === 0) {
+      return res.status(404).json({ message: 'No URLs found to transfer' });
+    }
+
+    // Get all date collections and check limits
+    const collections = await mongoose.connection.db.listCollections().toArray();
+    const dateCollections = collections
+      .filter(col => /^\d{8}$/.test(col.name))
+      .map(col => ({ name: col.name, date: moment(col.name, 'YYYYMMDD') }))
+      .filter(col => col.date.isValid())
+      .sort((a, b) => a.date.diff(b.date));
+
+    // Check if maximum collection limit is reached
+    if (dateCollections.length >= MAX_COLLECTIONS) {
+      return res.status(400).json({
+        message: `已达到最大集合限制（${MAX_COLLECTIONS}个），不能再添加URL。请清理旧集合后再试。`
+      });
+    }
+
+    let transferredCount = 0;
+    
+    // Transfer each URL to target collection
+    for (const urlData of urlsToTransfer) {
+      const { url, type = 'A', mobile, remark = '' } = urlData;
+      
+      // Determine which limit to use
+      const urlsPerMobile = type === 'A' ? URLS_PER_MOBILE : URLS_PER_MOBILE_B;
+      
+      // Check if target collection has space for this mobile
+      const mobileCount = await TargetUrlModel.countDocuments({ type, mobile });
+      if (mobileCount >= urlsPerMobile) {
+        console.warn(`Skipping URL transfer for mobile ${mobile}, type ${type} - limit reached`);
+        continue;
+      }
+      
+      // Create new URL entry in target collection
+      const newUrl = new TargetUrlModel({
+        url,
+        mobile,
+        type,
+        remark,
+        createTime: moment().format('YYYY-MM-DD HH:mm:ss'),
+        createByUserId: req.user._id
+      });
+      
+      await newUrl.save();
+      transferredCount++;
+    }
+
+    res.json({
+      message: `${transferredCount} URLs transferred successfully to collection ${nextDate}`,
+      transferredCount
+    });
+  } catch (error) {
+    console.error('Error transferring URLs:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // 全局API限流 - 100并发/分钟
-const apiLimiter = rateLimit({
-  windowMs: 60 * 1000, // 1分钟
-  max: 100, // 限制100个并发请求
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { message: '请求过于频繁，请稍后再试' }
+const apiLimiter = rateLimit({  
+  windowMs: 60 * 1000, // 1分钟  
+  max: 100, // 限制100个并发请求  
+  standardHeaders: true,  
+  legacyHeaders: false,  
+  message: { message: '请求过于频繁，请稍后再试' }  
 });
 
 // 为所有URLs接口应用限流
