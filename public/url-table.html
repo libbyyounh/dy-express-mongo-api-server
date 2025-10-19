@@ -6,6 +6,7 @@
     <title>URL收集表格查询</title>
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/float-nav.css">
+    <link rel="stylesheet" href="/css/dialog.css">
     <style>
         .container {
             max-width: 1200px;
@@ -160,11 +161,14 @@
             <button id="multipleDisabled" disabled class="btn-switch" style="background-color: #dc3545;" onclick="batchToggleDisabled(true)">批量禁用</button>
             <button id="multipleEnabled" disabled class="btn-switch" style="background-color: #28a745;" onclick="batchToggleDisabled(false)">批量启用</button>
             <button id="multipleTransfer" disabled class="btn-switch" style="background-color: #17a2b8;" onclick="batchTransfer()">复制集合</button>
+            <button id="parser" disabled class="btn-switch" style="background-color: #007bff;" onclick="batchParse()">解析视频</button>
         </div>
         
         <div class="table-container" id="tableContainer"></div>
     </div>
 
+    <!-- 引入dialog.js -->
+    <script src="/js/dialog.js"></script>
     <script src="/js/url-table.js"></script>
     <script src="/js/float-nav.js"></script>
     <script>

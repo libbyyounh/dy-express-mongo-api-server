@@ -4,6 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('datePicker').value = today;
 });
 
+let currentDataRows = [];
+
 async function fetchTableData() {
     const dateInput = document.getElementById('datePicker');
     const queryButton = document.getElementById('queryButton');
@@ -50,6 +52,8 @@ async function fetchTableData() {
 
         // 渲染表格
         renderTable(data.headers, data.rows);
+        // 保存当前数据行
+        currentDataRows = data.rows;
     } catch (error) {
         showError(error.message);
     } finally {
@@ -166,6 +170,7 @@ function updateActionButtons() {
     const multipleDisabled = document.getElementById('multipleDisabled');
     const multipleEnabled = document.getElementById('multipleEnabled');
     const multipleTransfer = document.getElementById('multipleTransfer');
+    const parser = document.getElementById('parser');
 
     multipleDel.disabled = checkedCount === 0;
     multipleSwitch.disabled = checkedCount === 0;
@@ -173,6 +178,7 @@ function updateActionButtons() {
     multipleDisabled.disabled = checkedCount === 0;
     multipleEnabled.disabled = checkedCount === 0;
     multipleTransfer.disabled = checkedCount === 0;
+    parser.disabled = checkedCount !== 1;
 }
 
 // 批量删除功能
@@ -386,4 +392,89 @@ async function batchTransfer() {
     } catch (error) {
         showError(error.message);
     }
+}
+
+async function batchParse() {
+    const checkedIds = Array.from(document.querySelectorAll('.row-checkbox:checked'))
+        .map(checkbox => checkbox.dataset.id);
+
+    if (checkedIds.length !== 1) {
+        showError('请选择要解析的一条数据');
+        return;
+    }
+
+    // 从当前数据行中获取选中的URL
+    const selectedRow = currentDataRows.find(row => row._id === checkedIds[0]);
+    if (!selectedRow) {
+        showError('无法找到选中的数据');
+        return;
+    }
+    
+
+    try {
+        // 确认解析URL
+        Dialog({
+            title: '解析URL',
+            message: `${selectedRow.url}`,
+            content: `
+            <div id="loadingMessage">加载中，请勿关闭对话框...</div>
+            <div class="dialog-p" style="display: none;">标题: <span id="titleSpan">loading...</span></div>
+            <div class="dialog-p" style="display: none;">链接: <a id="linkSpan" href="#" target="_blank">loading...</a></div>
+            <div class="dialog-p">
+                <button id="copyTitle" type="button">复制标题</button>
+                <button id="copyLink" type="button">复制链接</button>
+            </div>`
+        });
+        //
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/urls/batch/parseUrl', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                url: selectedRow.url
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || '解析失败');
+        }
+        const { title, download_url } = data.data;
+
+        // 更新解析结果到对话框
+        document.getElementById('titleSpan').textContent = title || '-';
+        document.getElementById('linkSpan').textContent = download_url || '-';
+        document.getElementById('linkSpan').href = download_url || '#';
+        // 隐藏加载消息
+        document.getElementById('loadingMessage').style.display = 'none';
+        Array.from(document.getElementsByClassName('dialog-p')).forEach(item => {
+            item.setAttribute('style', '');
+        });
+
+        // 复制标题和链接
+        document.getElementById('copyTitle').addEventListener('click', () => {
+            copyToClipboard(title || '-');
+        });
+        document.getElementById('copyLink').addEventListener('click', () => {
+            copyToClipboard(download_url || '-');
+        });
+
+    } catch (error) {
+        showError(error.message);
+    }
+}
+
+// 复制文本到剪贴板
+function copyToClipboard(text) {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textarea);
+    showError('已复制到剪贴板', 'success');
 }

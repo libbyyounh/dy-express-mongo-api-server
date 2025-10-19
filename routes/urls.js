@@ -5,6 +5,7 @@ const moment = require('moment');
 const Mobile = require('../models/Mobile');
 const rateLimit = require('express-rate-limit');
 const NodeCache = require('node-cache');
+const { parseDyVideoUrl } = require('../utils/3rdService'); // 导入抖音服务解析函数
 const cache = new NodeCache({ stdTTL: 300 }); // 5分钟缓存
 // 加载环境变量
 require('dotenv').config();
@@ -715,6 +716,53 @@ router.post('/batch/disabled', async (req, res) => {
     });
   } catch (error) {
     console.error('Error batch updating URLs:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
+/**
+ * @swagger
+ * /api/batch/parseUrl:
+ *   post:
+ *     summary: Parse a single URL
+ *     tags: [URLs]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - url
+ *             properties:
+ *               url:
+ *                 type: string
+ *                 description: The URL to parse
+ *     responses:
+ *       200:
+ *         description: URL parsed successfully
+ *       400:
+ *         description: Invalid input
+ *       500:
+ *         description: Server error
+ */
+router.post('/batch/parseUrl', async (req, res) => {
+  try {
+    const { url } = req.body;
+    if (!url || typeof url !== 'string') {
+      return res.status(400).json({ message: 'Valid URL is required' });
+    }
+    // 解析抖音视频URL
+    const data = await parseDyVideoUrl(url);
+    res.json({
+      message: `URL parsed successfully`,
+      data
+    });
+  } catch (error) {
+    console.error('Error parsing URL:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
