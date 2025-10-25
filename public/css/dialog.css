@@ -19,6 +19,7 @@
     flex-direction: column;
     gap: 10px;
     width: 70%;
+    overflow: auto;
 }
 .dialog-buttons {
     margin-top: 20px;
